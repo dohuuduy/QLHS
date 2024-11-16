@@ -1,1 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tài Liệu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        .header {
+            background: #f8f9fa;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .document-card {
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .document-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .card-tools {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+        }
+        .doc-date {
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+        .doc-content {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0">Quản Lý Tài Liệu</h1>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDocumentModal">
+                        <i class="fas fa-plus"></i> Thêm Tài Liệu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="container">
+        <!-- Thanh tìm kiếm và lọc -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchInput" 
+                           placeholder="Tìm kiếm tài liệu...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="filterType">
+                    <option value="">Tất cả thể loại</option>
+                    <option value="vanban">Văn bản</option>
+                    <option value="tailieu">Tài liệu</option>
+                    <option value="baocao">Báo cáo</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" id="sortBy">
+                    <option value="date-desc">Mới nhất</option>
+                    <option value="date-asc">Cũ nhất</option>
+                    <option value="name-asc">Tên A-Z</option>
+                    <option value="name-desc">Tên Z-A</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Danh sách tài liệu -->
+        <div id="documentsList" class="row">
+            <!-- Tài liệu sẽ được thêm vào đây qua JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal Thêm/Sửa Tài liệu -->
+    <div class="modal fade" id="addDocumentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm Tài Liệu Mới</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="documentForm">
+                        <input type="hidden" id="documentId">
+                        <div class="mb-3">
+                            <label class="form-label">Tên tài liệu</label>
+                            <input type="text" class="form-control" id="documentName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Thể loại</label>
+                            <select class="form-select" id="documentType" required>
+                                <option value="vanban">Văn bản</option>
+                                <option value="tailieu">Tài liệu</option>
+                                <option value="baocao">Báo cáo</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="documentDesc" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Link tài liệu</label>
+                            <input type="url" class="form-control" id="documentLink" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDocument()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Khởi tạo dữ liệu mẫu
+        if (!localStorage.getItem('documents')) {
+            const sampleDocs = [
+                {
+                    id: '1',
+                    name: 'Báo cáo quý 1/2024',
+                    type: 'baocao',
+                    description: 'Báo cáo tổng kết quý 1 năm 2024',
+                    link: 'https://example.com/doc1',
+                    date: '2024-03-30'
+                },
+                {
+                    id: '2',
+                    name: 'Quy trình làm việc',
+                    type: 'vanban',
+                    description: 'Quy trình làm việc mới cập nhật T3/2024',
+                    link: 'https://example.com/doc2',
+                    date: '2024-03-15'
+                }
+            ];
+            localStorage.setItem('documents', JSON.stringify(sampleDocs));
+        }
+
+        // Lấy tất cả tài liệu
+        function getDocuments() {
+            return JSON.parse(localStorage.getItem('documents')) || [];
+        }
+
+        // Lưu tài liệu
+        function saveDocument() {
+            const form = document.getElementById('documentForm');
+            if (form.checkValidity()) {
+                const documents = getDocuments();
+                const docId = document.getElementById('documentId').value;
+                
+                const document = {
+                    id: docId || Date.now().toString(),
+                    name: document.getElementById('documentName').value,
+                    type: document.getElementById('documentType').value,
+                    description: document.getElementById('documentDesc').value,
+                    link: document.getElementById('documentLink').value,
+                    date: new Date().toISOString().split('T')[0]
+                };
+
+                if (docId) {
+                    // Cập nhật
+                    const index = documents.findIndex(doc => doc.id === docId);
+                    documents[index] = document;
+                } else {
+                    // Thêm mới
+                    documents.push(document);
+                }
+
+                localStorage.setItem('documents', JSON.stringify(documents));
+                bootstrap.Modal.getInstance(document.getElementById('addDocumentModal')).hide();
+                displayDocuments();
+            } else {
+                form.reportValidity();
+            }
+        }
+
+        // Hiển thị tài liệu
+        function displayDocuments() {
+            let documents = getDocuments();
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterType = document.getElementById('filterType').value;
+            const sortBy = document.getElementById('sortBy').value;
+
+            // Lọc
+            documents = documents.filter(doc => {
+                const matchSearch = doc.name.toLowerCase().includes(searchTerm) || 
+                                  doc.description.toLowerCase().includes(searchTerm);
+                const matchType = filterType ? doc.type === filterType : true;
+                return matchSearch && matchType;
+            });
+
+            // Sắp xếp
+            documents.sort((a, b) => {
+                switch(sortBy) {
+                    case 'date-desc':
+                        return new Date(b.date) - new Date(a.date);
+                    case 'date-asc':
+                        return new Date(a.date) - new Date(b.date);
+                    case 'name-asc':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                }
+            });
+
+            const container = document.getElementById('documentsList');
+            container.innerHTML = documents.map(doc => `
+                <div class="col-md-4">
+                    <div class="card document-card">
+                        <div class="card-body">
+                            <div class="card-tools">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editDocument('${doc.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteDocument('${doc.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <h5 class="card-title">${doc.name}</h5>
+                            <span class="badge bg-primary">${doc.type}</span>
+                            <div class="doc-date">
+                                <i class="far fa-calendar-alt"></i> ${doc.date}
+                            </div>
+                            <div class="doc-content">
+                                <p class="card-text">${doc.description}</p>
+                                <a href="${doc.link}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-external-link-alt"></i> Mở tài liệu
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Sửa tài liệu
+        function editDocument(id) {
+            const documents = getDocuments();
+            const doc = documents.find(d => d.id === id);
+            if (doc) {
+                document.getElementById('documentId').value = doc.id;
+                document.getElementById('documentName').value = doc.name;
+                document.getElementById('documentType').value = doc.type;
+                document.getElementById('documentDesc').value = doc.description;
+                document.getElementById('documentLink').value = doc.link;
+                
+                const modal = new bootstrap.Modal(document.getElementById('addDocumentModal'));
+                modal.show();
+            }
+        }
+
+        // Xóa tài liệu
+        function deleteDocument(id) {
+            if (confirm('Bạn có chắc muốn xóa tài liệu này?')) {
+                const documents = getDocuments().filter(doc => doc.id !== id);
+                localStorage.setItem('documents', JSON.stringify(documents));
+                displayDocuments();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', displayDocuments);
+        document.getElementById('filterType').addEventListener('change', displayDocuments);
+        document.getElementById('sortBy').addEventListener('change', displayDocuments);
+
+        // Load documents when page loads
+        displayDocuments();
+
+        // Reset form when modal is opened for new document
+        document.getElementById('addDocumentModal').addEventListener('show.bs.modal', function (event) {
+            if (!event.relatedTarget.closest('.btn-outline-primary')) {
+                document.getElementById('documentForm').reset();
+                document.getElementById('documentId').value = '';
+            }
+        });
+    </script>
+</body>
+</html>
