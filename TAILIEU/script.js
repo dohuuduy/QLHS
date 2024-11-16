@@ -1,26 +1,33 @@
 function openAddDocumentForm() {
-  // Hiển thị modal thêm mới tài liệu
+  // Reset form và hiển thị modal thêm mới
+  document.getElementById("documentForm").reset();
   $('#documentModal').modal('show');
 }
 
 function saveDocument() {
-  // Lấy thông tin từ form
+  // Lấy dữ liệu từ form
   const tenTaiLieu = document.getElementById('tenTaiLieu').value;
+  const moTa = document.getElementById('moTa').value;
+  const ngayTao = document.getElementById('ngayTao').value;
   const loaiTaiLieu = document.getElementById('loaiTaiLieu').value;
-  const ngayBanHanh = document.getElementById('ngayBanHanh').value;
-  const nguoiPhuTrach = document.getElementById('nguoiPhuTrach').value;
-  const fileDinhKem = document.getElementById('fileDinhKem').value;
+  const tieuChuan = document.getElementById('tieuChuan').value;
+  const phienBan = document.getElementById('phienBan').value;
+  const trangThai = document.getElementById('trangThai').value;
+  const nguoiTao = document.getElementById('nguoiTao').value;
 
-  // Tạo hàng mới cho bảng
+  // Thêm dữ liệu vào bảng (cần bổ sung logic lưu dữ liệu vào Google Sheets)
   const table = document.getElementById('documentTable').getElementsByTagName('tbody')[0];
   const newRow = table.insertRow();
   newRow.innerHTML = `
     <td>${Math.floor(Math.random() * 1000)}</td>
     <td>${tenTaiLieu}</td>
+    <td>${moTa}</td>
+    <td>${ngayTao}</td>
     <td>${loaiTaiLieu}</td>
-    <td>${ngayBanHanh}</td>
-    <td>${nguoiPhuTrach}</td>
-    <td><a href="${fileDinhKem}" target="_blank">Xem File</a></td>
+    <td>${tieuChuan}</td>
+    <td>${phienBan}</td>
+    <td>${trangThai}</td>
+    <td>${nguoiTao}</td>
     <td>
       <button class="btn btn-warning btn-sm" onclick="editDocument(this)">Sửa</button>
       <button class="btn btn-danger btn-sm" onclick="deleteDocument(this)">Xóa</button>
@@ -29,13 +36,10 @@ function saveDocument() {
 
   // Ẩn modal sau khi lưu
   $('#documentModal').modal('hide');
-  // Xóa dữ liệu trong form
-  document.getElementById('documentForm').reset();
 }
 
 function editDocument(button) {
-  // TODO: Thêm chức năng chỉnh sửa
-  alert("Chức năng chỉnh sửa sẽ được triển khai sau!");
+  // Logic chỉnh sửa tài liệu (cần bổ sung)
 }
 
 function deleteDocument(button) {
