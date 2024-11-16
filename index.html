@@ -4,16 +4,87 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản lý Hồ Sơ Tài Liệu</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Quản lý Tài Liệu</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .modal-header {
+      background-color: #007bff;
+      color: white;
+    }
+    .modal-footer .btn {
+      margin-left: 10px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1 class="text-center mt-4">Quản lý Hồ Sơ Tài Liệu</h1>
-    <button class="btn btn-primary mt-3" onclick="openAddDocumentForm()">Thêm mới</button>
-    <table id="documentTable" class="table table-striped mt-3"></table>
+  <div class="container mt-4">
+    <h1 class="text-center">Quản lý Tài Liệu</h1>
+    <button class="btn btn-primary mb-3" onclick="openAddDocumentForm()">Thêm mới</button>
+    
+    <!-- Bảng danh sách tài liệu -->
+    <table class="table table-bordered table-striped" id="documentTable">
+      <thead class="thead-dark">
+        <tr>
+          <th>ID</th>
+          <th>Tên Tài Liệu</th>
+          <th>Loại Tài Liệu</th>
+          <th>Ngày Ban Hành</th>
+          <th>Người Phụ Trách</th>
+          <th>File Đính Kèm</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Dữ liệu sẽ được thêm động bằng JavaScript -->
+      </tbody>
+    </table>
   </div>
+
+  <!-- Modal thêm/sửa tài liệu -->
+  <div class="modal fade" id="documentModal" tabindex="-1" aria-labelledby="documentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="documentModalLabel">Thêm mới Tài Liệu</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="documentForm">
+            <div class="form-group">
+              <label for="tenTaiLieu">Tên Tài Liệu</label>
+              <input type="text" class="form-control" id="tenTaiLieu" required>
+            </div>
+            <div class="form-group">
+              <label for="loaiTaiLieu">Loại Tài Liệu</label>
+              <input type="text" class="form-control" id="loaiTaiLieu" required>
+            </div>
+            <div class="form-group">
+              <label for="ngayBanHanh">Ngày Ban Hành</label>
+              <input type="date" class="form-control" id="ngayBanHanh" required>
+            </div>
+            <div class="form-group">
+              <label for="nguoiPhuTrach">Người Phụ Trách</label>
+              <input type="text" class="form-control" id="nguoiPhuTrach" required>
+            </div>
+            <div class="form-group">
+              <label for="fileDinhKem">File Đính Kèm (URL)</label>
+              <input type="url" class="form-control" id="fileDinhKem" required>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="saveDocument()">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
