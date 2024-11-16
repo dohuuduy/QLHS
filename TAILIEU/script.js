@@ -47,3 +47,34 @@ function deleteDocument(button) {
   const row = button.parentNode.parentNode;
   row.parentNode.removeChild(row);
 }
+// script.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Giả sử bạn có một mảng dữ liệu tạm thời
+    const data = [
+        { id: 1, ten_tai_lieu: 'Tài liệu A', mo_ta: 'Mô tả A' },
+        { id: 2, ten_tai_lieu: 'Tài liệu B', mo_ta: 'Mô tả B' }
+    ];
+
+    // Lấy phần tử bảng
+    const table = document.getElementById('documentTable');
+
+    // Tạo header của bảng
+    const headerRow = document.createElement('tr');
+    headerRow.innerHTML = `
+        <th>ID</th>
+        <th>Tên Tài Liệu</th>
+        <th>Mô Tả</th>
+    `;
+    table.appendChild(headerRow);
+
+    // Duyệt qua dữ liệu và tạo hàng cho từng tài liệu
+    data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.id}</td>
+            <td>${item.ten_tai_lieu}</td>
+            <td>${item.mo_ta}</td>
+        `;
+        table.appendChild(row);
+    });
+});
