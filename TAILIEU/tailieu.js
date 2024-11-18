@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadDocuments() {
-    const sheetUrl = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // Thay YOUR_SCRIPT_ID bằng ID của Google Apps Script
+    const sheetUrl = 'https://script.google.com/macros/s/AKfycbyY7FYAE1KGgc6AOlYsfhyd-ZLm_FTmBgIAP7XyWBwp4jivD4B_W66Do3Sbkgw7rvBJ/exec'; // Thay YOUR_SCRIPT_ID bằng ID của Google Apps Script
 
     fetch(sheetUrl)
         .then(response => response.json())
