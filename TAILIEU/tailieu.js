@@ -3,36 +3,32 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function loadDocuments() {
-    // Hàm để tải dữ liệu từ Google Sheet và hiển thị trên bảng
-    // (Phần này bạn cần tự xử lý với dữ liệu từ Google Sheets)
-    // Ví dụ mẫu dữ liệu (bạn cần thay bằng dữ liệu thực tế):
-    const sampleData = [
-        { id: 1, ten_tai_lieu: 'Quy Trình A', mo_ta: 'Mô tả A', ngay_tao: '2024-11-18', loai_tai_lieu: 'Quy trình', tieu_chuan: 'ISO', phien_ban: '1.0', trang_thai: 'Hiệu lực', nguoi_tao: 'Nguyễn Văn A' },
-        { id: 2, ten_tai_lieu: 'Hướng Dẫn B', mo_ta: 'Mô tả B', ngay_tao: '2024-11-19', loai_tai_lieu: 'Hướng dẫn', tieu_chuan: 'BRC', phien_ban: '2.0', trang_thai: 'Hiệu lực', nguoi_tao: 'Trần Thị B' }
-    ];
+    const sheetUrl = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // Thay YOUR_SCRIPT_ID bằng ID của Google Apps Script
 
-    const tableBody = document.querySelector("#documentTable tbody");
-    tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+    fetch(sheetUrl)
+        .then(response => response.json())
+        .then(data => {
+            const tableBody = document.querySelector("#documentTable tbody");
+            tableBody.innerHTML = ""; // Xóa dữ liệu cũ
 
-    sampleData.forEach((doc) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${doc.id}</td>
-            <td>${doc.ten_tai_lieu}</td>
-            <td>${doc.mo_ta}</td>
-            <td>${doc.ngay_tao}</td>
-            <td>${doc.loai_tai_lieu}</td>
-            <td>${doc.tieu_chuan}</td>
-            <td>${doc.phien_ban}</td>
-            <td>${doc.trang_thai}</td>
-            <td>${doc.nguoi_tao}</td>
-            <td>
-                <button class="btn btn-warning btn-sm" onclick="openForm('edit', ${JSON.stringify(doc)})">Sửa</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteDocument(${doc.id})">Xóa</button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
+            data.forEach(doc => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${doc.id}</td>
+                    <td>${doc.ten_tai_lieu}</td>
+                    <td>${doc.mo_ta}</td>
+                    <td>${doc.loai_tai_lieu}</td>
+                    <td>${doc.ngay_tao}</td>
+                    <td>${doc.ngay_cap_nhat}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="openForm('edit', ${JSON.stringify(doc)})">Sửa</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteDocument(${doc.id})">Xóa</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
 }
 
 function openForm(mode, data = null) {
