@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('mo_ta', moTa);
 
         // Gửi yêu cầu POST đến Google Apps Script
-        fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+        fetch('https://script.google.com/macros/s/AKfycbyY7FYAE1KGgc6AOlYsfhyd-ZLm_FTmBgIAP7XyWBwp4jivD4B_W66Do3Sbkgw7rvBJ/exec', {
             method: 'POST',
             body: formData
         })
