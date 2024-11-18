@@ -1,29 +1,31 @@
-// URL của Web App mà bạn đã triển khai từ Google Apps Script
-const sheetUrl = 'https://script.google.com/macros/s/AKfycbyY7FYAE1KGgc6AOlYsfhyd-ZLm_FTmBgIAP7XyWBwp4jivD4B_W66Do3Sbkgw7rvBJ/exec'; // Thay YOUR_SCRIPT_ID bằng ID bạn nhận được
+document.addEventListener("DOMContentLoaded", function() {
+    loadDocuments();
+});
 
-// Lấy dữ liệu từ Google Apps Script (Web App)
 function loadDocuments() {
-    fetch(sheetUrl)
-        .then(response => response.json())
-        .then(data => {
-            const rows = data;
-            if (rows.length) {
-                const documentTable = document.getElementById('documentTable');
-                documentTable.innerHTML = ''; // Làm sạch bảng
-
-                rows.forEach(row => {
-                    const rowElement = documentTable.insertRow();
-                    rowElement.insertCell(0).innerText = row.id;
-                    rowElement.insertCell(1).innerText = row.ten_tai_lieu;
-                    rowElement.insertCell(2).innerText = row.mo_ta;
-                    rowElement.insertCell(3).innerText = row.loai_tai_lieu;
-                    rowElement.insertCell(4).innerText = row.ngay_tao;
-                    rowElement.insertCell(5).innerText = row.ngay_cap_nhat;
-                });
-            }
-        })
-        .catch(error => console.error('Error loading documents:', error));
+    // Hàm để tải dữ liệu từ Google Sheet và hiển thị trên bảng
+    // (Phần này bạn cần tự xử lý với dữ liệu từ Google Sheets)
 }
 
-// Gọi loadDocuments khi trang được tải
-window.onload = loadDocuments;
+function openForm(mode, data = null) {
+    const modal = document.getElementById('documentFormModal');
+    document.getElementById('formTitle').innerText = mode === 'add' ? 'Thêm Tài Liệu' : 'Sửa Tài Liệu';
+    
+    if (mode === 'edit' && data) {
+        // Gán dữ liệu vào form nếu chỉnh sửa
+        document.getElementById('ten_tai_lieu').value = data.ten_tai_lieu;
+        document.getElementById('mo_ta').value = data.mo_ta;
+        // Gán các giá trị khác tương ứng
+    } else {
+        // Reset form nếu thêm mới
+        document.getElementById('documentForm').reset();
+    }
+
+    $(modal).modal('show');
+}
+
+document.getElementById('documentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    // Lưu dữ liệu vào Google Sheet (cần xử lý lưu vào Google Sheets)
+    $('#documentFormModal').modal('hide');
+});
