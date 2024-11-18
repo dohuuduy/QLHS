@@ -1,18 +1,40 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', function() {
     loadDocuments();
+
+    document.getElementById('documentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const tenTaiLieu = document.getElementById('ten_tai_lieu').value;
+        const moTa = document.getElementById('mo_ta').value;
+        const formData = new URLSearchParams();
+        formData.append('ten_tai_lieu', tenTaiLieu);
+        formData.append('mo_ta', moTa);
+
+        // Gửi yêu cầu POST đến Google Apps Script
+        fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            console.log('Success:', data);
+            loadDocuments();
+            document.getElementById('documentForm').reset();
+            const modal = new bootstrap.Modal(document.getElementById('documentFormModal'));
+            modal.hide();
+        })
+        .catch(error => console.error('Error:', error));
+    });
 });
 
 function loadDocuments() {
-    const sheetUrl = 'https://script.google.com/macros/s/AKfycbyY7FYAE1KGgc6AOlYsfhyd-ZLm_FTmBgIAP7XyWBwp4jivD4B_W66Do3Sbkgw7rvBJ/exec'; // Thay YOUR_SCRIPT_ID bằng ID của Google Apps Script
-
-    fetch(sheetUrl)
+    fetch('https://script.google.com/macros/s/AKfycbyY7FYAE1KGgc6AOlYsfhyd-ZLm_FTmBgIAP7XyWBwp4jivD4B_W66Do3Sbkgw7rvBJ/exec')
         .then(response => response.json())
         .then(data => {
-            const tableBody = document.querySelector("#documentTable tbody");
-            tableBody.innerHTML = ""; // Xóa dữ liệu cũ
-
+            const tableBody = document.querySelector('#documentTable tbody');
+            tableBody.innerHTML = '';
             data.forEach(doc => {
-                const row = document.createElement("tr");
+                const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${doc.id}</td>
                     <td>${doc.ten_tai_lieu}</td>
@@ -20,41 +42,10 @@ function loadDocuments() {
                     <td>${doc.loai_tai_lieu}</td>
                     <td>${doc.ngay_tao}</td>
                     <td>${doc.ngay_cap_nhat}</td>
-                    <td>
-                        <button class="btn btn-warning btn-sm" onclick="openForm('edit', ${JSON.stringify(doc)})">Sửa</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteDocument(${doc.id})">Xóa</button>
-                    </td>
+                    <td><button class="btn btn-danger btn-sm">Xóa</button></td>
                 `;
                 tableBody.appendChild(row);
             });
         })
-        .catch(error => console.error('Error fetching data:', error));
-}
-
-function openForm(mode, data = null) {
-    const modal = document.getElementById('documentFormModal');
-    document.getElementById('formTitle').innerText = mode === 'add' ? 'Thêm Tài Liệu' : 'Sửa Tài Liệu';
-
-    if (mode === 'edit' && data) {
-        // Gán dữ liệu vào form nếu chỉnh sửa
-        document.getElementById('ten_tai_lieu').value = data.ten_tai_lieu;
-        document.getElementById('mo_ta').value = data.mo_ta;
-        // Gán các giá trị khác tương ứng
-    } else {
-        // Reset form nếu thêm mới
-        document.getElementById('documentForm').reset();
-    }
-
-    $('#documentFormModal').modal('show');
-}
-
-document.getElementById('documentForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    // Lưu dữ liệu vào Google Sheet (cần xử lý lưu vào Google Sheets)
-    $('#documentFormModal').modal('hide');
-});
-
-function deleteDocument(id) {
-    // Hàm để xóa tài liệu (cần xử lý xóa trong Google Sheets)
-    alert(`Xóa tài liệu với ID: ${id}`);
+        .catch(error => console.error('Error loading documents:', error));
 }
