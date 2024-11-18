@@ -1,13 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Quản Lý Tài Liệu</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Hồ Sơ - Tài Liệu</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="container mt-5">
-        <h2 class="mb-4">Quản Lý Tài Liệu</h2>
-        <table class="table table-bordered" id="documentTable">
+    <div class="container mt-4">
+        <h1 class="text-center">Quản Lý Hồ Sơ - Tài Liệu</h1>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#documentFormModal">Thêm Tài Liệu</button>
+        <table class="table table-striped" id="documentTable">
             <thead>
                 <tr>
                     <th>ID</th>
@@ -21,39 +27,35 @@
             </thead>
             <tbody></tbody>
         </table>
-        <button class="btn btn-primary" onclick="openForm('add')">Thêm Tài Liệu</button>
     </div>
 
-    <!-- Modal để thêm/sửa tài liệu -->
-    <div class="modal fade" id="documentFormModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <!-- Modal Form -->
+    <div class="modal fade" id="documentFormModal" tabindex="-1" aria-labelledby="documentFormModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="formTitle"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="documentFormModalLabel">Thêm Tài Liệu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="documentForm">
-                        <div class="form-group">
-                            <label for="ten_tai_lieu">Tên Tài Liệu</label>
+                        <div class="mb-3">
+                            <label for="ten_tai_lieu" class="form-label">Tên Tài Liệu</label>
                             <input type="text" class="form-control" id="ten_tai_lieu" required>
                         </div>
-                        <div class="form-group">
-                            <label for="mo_ta">Mô Tả</label>
-                            <textarea class="form-control" id="mo_ta" required></textarea>
+                        <div class="mb-3">
+                            <label for="mo_ta" class="form-label">Mô Tả</label>
+                            <textarea class="form-control" id="mo_ta" rows="3" required></textarea>
                         </div>
-                        <!-- Thêm các trường khác tùy theo yêu cầu -->
-                        <button type="submit" class="btn btn-success">Lưu</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="tailieu.js"></script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
