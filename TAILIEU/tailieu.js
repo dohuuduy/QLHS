@@ -1,21 +1,26 @@
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyY7FYAE1KGgc6AOlYsfhyd-ZLm_FTmBgIAP7XyWBwp4jivD4B_W66Do3Sbkgw7rvBJ/exec';
 
+let isEditing = false; // Biến để xác định trạng thái Thêm hay Sửa
+let editingId = null; // ID của tài liệu đang được sửa
+
 document.addEventListener('DOMContentLoaded', function() {
     loadDocuments();
 
     document.getElementById('documentForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        const id = document.getElementById('documentId').value;
         const tenTaiLieu = document.getElementById('ten_tai_lieu').value;
         const moTa = document.getElementById('mo_ta').value;
 
         const formData = new URLSearchParams();
-        formData.append('id', id);
         formData.append('ten_tai_lieu', tenTaiLieu);
         formData.append('mo_ta', moTa);
 
-        fetch(`${WEB_APP_URL}`, {
+        if (isEditing && editingId) {
+            formData.append('id', editingId); // Thêm ID nếu đang chỉnh sửa
+        }
+
+        fetch(WEB_APP_URL, {
             method: 'POST',
             body: formData
         })
@@ -25,6 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadDocuments();
                 $('#documentFormModal').modal('hide'); // Đóng form modal
                 document.getElementById('documentForm').reset(); // Reset form
+                isEditing = false; // Đặt lại trạng thái
+                editingId = null; // Đặt lại ID chỉnh sửa
             } else {
                 alert('Lỗi khi lưu dữ liệu: ' + data.error);
             }
@@ -34,10 +41,19 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Đã xảy ra lỗi khi kết nối với server.');
         });
     });
+
+    // Nút mở form Thêm tài liệu
+    document.getElementById('addNewDocument').addEventListener('click', function() {
+        isEditing = false;
+        editingId = null;
+        document.getElementById('modalTitle').textContent = 'Thêm Tài Liệu';
+        document.getElementById('documentForm').reset();
+        $('#documentFormModal').modal('show');
+    });
 });
 
 function loadDocuments() {
-    fetch(`${WEB_APP_URL}`)
+    fetch(WEB_APP_URL)
         .then(response => response.json())
         .then(data => {
             const tableBody = document.querySelector('#documentTable tbody');
@@ -73,10 +89,13 @@ function editDocument(id) {
     fetch(`${WEB_APP_URL}?id=${id}`)
         .then(response => response.json())
         .then(doc => {
-            document.getElementById('documentId').value = doc.id;
             document.getElementById('ten_tai_lieu').value = doc.ten_tai_lieu;
             document.getElementById('mo_ta').value = doc.mo_ta;
 
+            isEditing = true; // Đặt trạng thái thành Sửa
+            editingId = id; // Lưu ID của tài liệu đang sửa
+
+            document.getElementById('modalTitle').textContent = 'Sửa Tài Liệu';
             $('#documentFormModal').modal('show'); // Hiển thị form modal
         })
         .catch(error => {
