@@ -72,28 +72,31 @@ function loadDocuments() {
 
 
 function editDocument(id) {
-    // Gọi Web App với tham số ID để lấy dữ liệu chi tiết của tài liệu
-    fetch(`${WEB_APP_URL}?id=${id}`)
-        .then(response => response.json())
-        .then(doc => {
-            if (doc && doc.ten_tai_lieu && doc.mo_ta) { // Kiểm tra dữ liệu có tồn tại và không bị undefined
-                document.getElementById('ten_tai_lieu').value = doc.ten_tai_lieu;
-                document.getElementById('mo_ta').value = doc.mo_ta;
+  // Sử dụng URL Web App Google Apps Script
+  fetch(`${WEB_APP_URL}?id=${id}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data) {
+        // Điền dữ liệu vào form chỉnh sửa
+        document.getElementById('tenTaiLieu').value = data.ten_tai_lieu || '';
+        document.getElementById('moTa').value = data.mo_ta || '';
+        document.getElementById('loaiTaiLieu').value = data.loai_tai_lieu || '';
+        document.getElementById('ngayTao').value = data.ngay_tao || '';
+        document.getElementById('ngayCapNhat').value = data.ngay_cap_nhat || '';
 
-                isEditing = true; // Đặt trạng thái thành Sửa
-                editingId = id; // Lưu ID của tài liệu đang sửa
-
-                document.getElementById('modalTitle').textContent = 'Sửa Tài Liệu';
-                $('#documentFormModal').modal('show'); // Hiển thị form modal
-            } else {
-                alert('Không tìm thấy dữ liệu của tài liệu để chỉnh sửa. Vui lòng thử lại.');
-            }
-        })
-        .catch(error => {
-            console.error('Lỗi khi tải dữ liệu để chỉnh sửa:', error);
-            alert('Đã xảy ra lỗi khi tải dữ liệu để chỉnh sửa.');
-        });
+        // Hiển thị form chỉnh sửa
+        document.getElementById('editForm').style.display = 'block';
+      } else {
+        alert("Không tìm thấy dữ liệu.");
+      }
+    })
+    .catch(error => {
+      console.error("Lỗi khi tải dữ liệu để sửa:", error);
+      alert("Đã xảy ra lỗi khi tải dữ liệu để sửa.");
+    });
 }
+
+
 
 
 function deleteDocument(id) {
