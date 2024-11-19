@@ -1,4 +1,4 @@
-const YOUR_SCRIPT_ID = 'AKfycbyY7FYAE1KGgc6AOlYsfhyd-ZLm_FTmBgIAP7XyWBwp4jivD4B_W66Do3Sbkgw7rvBJ';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyY7FYAE1KGgc6AOlYsfhyd-ZLm_FTmBgIAP7XyWBwp4jivD4B_W66Do3Sbkgw7rvBJ/exec';
 
 document.addEventListener('DOMContentLoaded', function() {
     loadDocuments();
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('ten_tai_lieu', tenTaiLieu);
         formData.append('mo_ta', moTa);
 
-        fetch(`https://script.google.com/macros/s/${YOUR_SCRIPT_ID}/exec`, {
+        fetch(`${WEB_APP_URL}`, {
             method: 'POST',
             body: formData
         })
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadDocuments() {
-    fetch(`https://script.google.com/macros/s/${YOUR_SCRIPT_ID}/exec`)
+    fetch(`${WEB_APP_URL}`)
         .then(response => response.json())
         .then(data => {
             const tableBody = document.querySelector('#documentTable tbody');
@@ -70,7 +70,7 @@ function loadDocuments() {
 }
 
 function editDocument(id) {
-    fetch(`https://script.google.com/macros/s/${YOUR_SCRIPT_ID}/exec?id=${id}`)
+    fetch(`${WEB_APP_URL}?id=${id}`)
         .then(response => response.json())
         .then(doc => {
             document.getElementById('documentId').value = doc.id;
@@ -87,7 +87,7 @@ function editDocument(id) {
 
 function deleteDocument(id) {
     if (confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) {
-        fetch(`https://script.google.com/macros/s/${YOUR_SCRIPT_ID}/exec?deleteId=${id}`, {
+        fetch(`${WEB_APP_URL}?deleteId=${id}`, {
             method: 'POST'
         })
         .then(response => response.json())
