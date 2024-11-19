@@ -1,61 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Hồ Sơ - Tài Liệu</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-4">
-        <h1 class="text-center">Quản Lý Hồ Sơ - Tài Liệu</h1>
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#documentFormModal">Thêm Tài Liệu</button>
-        <table class="table table-striped" id="documentTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên Tài Liệu</th>
-                    <th>Mô Tả</th>
-                    <th>Loại Tài Liệu</th>
-                    <th>Ngày Tạo</th>
-                    <th>Ngày Cập Nhật</th>
-                    <th>Hành Động</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+<!-- Nút Thêm và Bảng Tài Liệu -->
+<div class="container mt-4">
+    <h1 class="text-center">Quản Lý Hồ Sơ - Tài Liệu</h1>
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#documentFormModal">Thêm Tài Liệu</button>
+    <table class="table table-striped" id="documentTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên Tài Liệu</th>
+                <th>Mô Tả</th>
+                <th>Loại Tài Liệu</th>
+                <th>Ngày Tạo</th>
+                <th>Ngày Cập Nhật</th>
+                <th>Hành Động</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 
-    <!-- Modal Form -->
-    <div class="modal fade" id="documentFormModal" tabindex="-1" aria-labelledby="documentFormModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="documentFormModalLabel">Thêm Tài Liệu</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="documentForm">
-                        <div class="mb-3">
-                            <label for="ten_tai_lieu" class="form-label">Tên Tài Liệu</label>
-                            <input type="text" class="form-control" id="ten_tai_lieu" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="mo_ta" class="form-label">Mô Tả</label>
-                            <textarea class="form-control" id="mo_ta" rows="3" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Lưu</button>
-                    </form>
-                </div>
+<!-- Modal Form -->
+<div class="modal fade" id="documentFormModal" tabindex="-1" aria-labelledby="documentFormModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="documentFormModalLabel">Thêm Tài Liệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="documentForm">
+                    <input type="hidden" id="documentId">
+                    <div class="mb-3">
+                        <label for="ten_tai_lieu" class="form-label">Tên Tài Liệu</label>
+                        <input type="text" class="form-control" id="ten_tai_lieu" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mo_ta" class="form-label">Mô Tả</label>
+                        <textarea class="form-control" id="mo_ta" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </form>
             </div>
         </div>
     </div>
-
-    <script src="tailieu.js"></script>
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
