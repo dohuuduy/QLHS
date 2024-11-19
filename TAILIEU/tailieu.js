@@ -1,5 +1,5 @@
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzRKtc6Dm_K8tnM8FI_CHgvlsg163rq4mj_t_6AjRV8Munno1zMKQDTxbzfJU5Vi_vh/exec';
-
+let editMode = false;  // Kiểm tra xem đang thêm hay sửa
 let isEditing = false; // Biến để xác định trạng thái Thêm hay Sửa
 let editingId = null; // ID của tài liệu đang được sửa
 
@@ -71,29 +71,54 @@ function loadDocuments() {
 }
 
 
-function editDocument(id) {
-  // Sử dụng URL Web App Google Apps Script
-  fetch(`${WEB_APP_URL}?id=${id}`)
+// Mở form sửa tài liệu
+function loadDocumentForEdit(id) {
+  fetch(`https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?id=${id}`)
     .then(response => response.json())
     .then(data => {
       if (data) {
-        // Điền dữ liệu vào form chỉnh sửa
-        document.getElementById('tenTaiLieu').value = data.ten_tai_lieu || '';
-        document.getElementById('moTa').value = data.mo_ta || '';
-        document.getElementById('loaiTaiLieu').value = data.loai_tai_lieu || '';
-        document.getElementById('ngayTao').value = data.ngay_tao || '';
-        document.getElementById('ngayCapNhat').value = data.ngay_cap_nhat || '';
-
-        // Hiển thị form chỉnh sửa
-        document.getElementById('editForm').style.display = 'block';
-      } else {
-        alert("Không tìm thấy dữ liệu.");
+        document.getElementById('id').value = data.id;
+        document.getElementById('tenTaiLieu').value = data.ten_tai_lieu;
+        document.getElementById('moTa').value = data.mo_ta;
+        document.getElementById('loaiTaiLieu').value = data.loai_tai_lieu;
+        document.getElementById('ngayTao').value = data.ngay_tao;
+        document.getElementById('ngayCapNhat').value = data.ngay_cap_nhat;
+        document.getElementById('trangThai').value = data.trang_thai;
+        
+        editMode = true;  // Chuyển sang chế độ sửa
       }
-    })
-    .catch(error => {
-      console.error("Lỗi khi tải dữ liệu để sửa:", error);
-      alert("Đã xảy ra lỗi khi tải dữ liệu để sửa.");
     });
+}
+
+// Lưu tài liệu
+function saveDocument() {
+  const id = document.getElementById('id').value || Utilities.getUuid();
+  const tenTaiLieu = document.getElementById('tenTaiLieu').value;
+  const moTa = document.getElementById('moTa').value;
+  const loaiTaiLieu = document.getElementById('loaiTaiLieu').value;
+  const ngayTao = document.getElementById('ngayTao').value;
+  const ngayCapNhat = document.getElementById('ngayCapNhat').value;
+  const trangThai = document.getElementById('trangThai').value;
+
+  const documentData = {
+    id: id,
+    ten_tai_lieu: tenTaiLieu,
+    mo_ta: moTa,
+    loai_tai_lieu: loaiTaiLieu,
+    ngay_tao: ngayTao,
+    ngay_cap_nhat: ngayCapNhat,
+    trang_thai: trangThai
+  };
+  
+  const url = editMode ? 'YOUR_PUT_URL' : 'YOUR_POST_URL';
+  fetch(url, {
+    method: editMode ? 'PUT' : 'POST',
+    body: JSON.stringify(documentData),
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(response => response.json())
+  .then(data => alert('Lưu thành công!'))
+  .catch(error => alert('Có lỗi xảy ra!'));
 }
 
 
