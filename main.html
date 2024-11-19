@@ -1,20 +1,187 @@
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Quản Lý Hồ Sơ</title>
-    <link rel="stylesheet" href="style.css"> <!-- Đường dẫn đến file CSS chung -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Quản Lý Hồ Sơ Tài Liệu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        nav {
+            background-color: #34495e;
+            padding: 1rem 0;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: #2c3e50;
+        }
+
+        .main-content {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .card-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .card-link:hover {
+            background-color: #2980b9;
+        }
+
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem 0;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Quản Lý Hồ Sơ</h1>
+    <header>
+        <div class="container header-content">
+            <div class="logo">QLHS</div>
+            <div>
+                <p>Hệ Thống Quản Lý Hồ Sơ Tài Liệu</p>
+            </div>
+        </div>
+    </header>
+
     <nav>
-        <ul>
-            <li><a href="TAILIEU/tailieu.html">Quản lý Tài Liệu</a></li>
-            <!-- Thêm các liên kết khác nếu có -->
-        </ul>
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="index.html">Trang Chủ</a></li>
+                <li><a href="TAILIEU/tailieu.html">Quản Lý Tài Liệu</a></li>
+                <li><a href="HOSO/hoso.html">Hồ Sơ</a></li>
+                <li><a href="THONGKE/thongke.html">Thống Kê</a></li>
+                <li><a href="TIMKIEM/timkiem.html">Tìm Kiếm</a></li>
+            </ul>
+        </div>
     </nav>
-    <div>
-        <p>Chào mừng đến với hệ thống Quản Lý Hồ Sơ. Vui lòng chọn một mục từ menu để bắt đầu.</p>
-    </div>
+
+    <main class="container">
+        <div class="main-content">
+            <div class="card">
+                <h3>Quản Lý Tài Liệu</h3>
+                <p>Quản lý và tổ chức các tài liệu, văn bản theo danh mục</p>
+                <a href="TAILIEU/tailieu.html" class="card-link">Truy cập</a>
+            </div>
+
+            <div class="card">
+                <h3>Hồ Sơ</h3>
+                <p>Xem và quản lý hồ sơ cá nhân, đơn vị</p>
+                <a href="HOSO/hoso.html" class="card-link">Truy cập</a>
+            </div>
+
+            <div class="card">
+                <h3>Thống Kê</h3>
+                <p>Xem báo cáo và thống kê tổng quan</p>
+                <a href="THONGKE/thongke.html" class="card-link">Truy cập</a>
+            </div>
+
+            <div class="card">
+                <h3>Tìm Kiếm</h3>
+                <p>Tìm kiếm nhanh tài liệu và hồ sơ</p>
+                <a href="TIMKIEM/timkiem.html" class="card-link">Truy cập</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Hệ Thống Quản Lý Hồ Sơ Tài Liệu. All rights reserved.</p>
+        </div>
+    </footer>
 </body>
 </html>
