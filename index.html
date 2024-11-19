@@ -80,32 +80,20 @@
             margin-right: 15px;
         }
 
-        /* Toggle button styles - visible on both mobile and desktop */
-        .sidebar-toggle {
+        /* Trigger area */
+        .sidebar-trigger {
             position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            background: #2c3e50;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            transition: all 0.3s ease;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 100%;
+            z-index: 999;
+            background: rgba(0,0,0,0.05);
         }
 
-        .sidebar-toggle:hover {
-            background: #34495e;
-        }
-
-        .sidebar-toggle.active {
-            left: 260px;
+        .sidebar-trigger:hover + .sidebar,
+        .sidebar:hover {
+            left: 0;
         }
 
         /* Header styles */
@@ -120,7 +108,7 @@
             position: fixed;
             top: 0;
             right: 0;
-            left: 80px;
+            left: 20px;
             z-index: 100;
             transition: all 0.3s ease;
         }
@@ -132,7 +120,6 @@
         .header-left h2 {
             color: #2c3e50;
             font-weight: 600;
-            font-size: 1.5rem;
         }
 
         .header-right {
@@ -163,7 +150,7 @@
 
         /* Main content */
         .main-content {
-            margin-left: 80px;
+            margin-left: 20px;
             margin-top: 60px;
             padding: 20px;
             transition: all 0.3s ease;
@@ -193,96 +180,222 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .card-icon {
+            font-size: 2em;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .card-link {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .card-link:hover {
+            background-color: #2980b9;
+        }
+
+        /* Mobile toggle button */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar-trigger {
+                display: none;
+            }
+
+            .sidebar {
+                left: -250px;
+            }
+
+            .header, .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
             .header {
                 left: 0;
-                padding-left: 70px;
-            }
-
-            .header-left h2 {
-                font-size: 1.2rem;
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 15px;
+                padding-left: 60px;
             }
 
             .cards-container {
                 grid-template-columns: 1fr;
-                padding: 10px;
-            }
-
-            .card {
-                padding: 15px;
-            }
-
-            .sidebar-toggle.active {
-                left: 210px;
-            }
-        }
-
-        /* Overlay for mobile */
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        @media (max-width: 480px) {
-            .header-left h2 {
-                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Overlay for mobile -->
-    <div class="overlay" id="overlay"></div>
-
-    <!-- Toggle Button - now visible on both mobile and desktop -->
+    <!-- Mobile Toggle Button -->
     <button class="sidebar-toggle" id="sidebarToggle">
         <i class="fas fa-bars"></i>
     </button>
 
-    <!-- Rest of the HTML remains the same until the script -->
+    <!-- Trigger Area -->
+    <div class="sidebar-trigger"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="profile">
+            <img src="/api/placeholder/100/100" alt="profile_picture">
+            <h3>QLHS System</h3>
+            <p>Quản lý hồ sơ</p>
+        </div>
+
+        <ul>
+            <li>
+                <a href="#" class="active">
+                    <i class="fas fa-home"></i>
+                    <span>Trang Chủ</span>
+                </a>
+            </li>
+            <li>
+                <a href="TAILIEU/tailieu.html">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Quản Lý Tài Liệu</span>
+                </a>
+            </li>
+            <li>
+                <a href="HOSO/hoso.html">
+                    <i class="fas fa-folder"></i>
+                    <span>Hồ Sơ</span>
+                </a>
+            </li>
+            <li>
+                <a href="THONGKE/thongke.html">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Thống Kê</span>
+                </a>
+            </li>
+            <li>
+                <a href="TIMKIEM/timkiem.html">
+                    <i class="fas fa-search"></i>
+                    <span>Tìm Kiếm</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-cog"></i>
+                    <span>Cài Đặt</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h2>Hệ Thống Quản Lý Hồ Sơ Tài Liệu</h2>
+        </div>
+        <div class="header-right">
+            <div class="notifications">
+                <i class="fas fa-bell"></i>
+                <span class="badge">3</span>
+            </div>
+            <div class="user-profile">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3>Quản Lý Tài Liệu</h3>
+                <p>Quản lý và tổ chức các tài liệu, văn bản theo danh mục. Dễ dàng truy cập và cập nhật.</p>
+                <a href="TAILIEU/tailieu.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <h3>Hồ Sơ</h3>
+                <p>Xem và quản lý hồ sơ cá nhân, đơn vị. Cập nhật thông tin một cách hiệu quả.</p>
+                <a href="HOSO/hoso.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3>Thống Kê</h3>
+                <p>Xem báo cáo và thống kê tổng quan. Phân tích dữ liệu chi tiết.</p>
+                <a href="THONGKE/thongke.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Tìm Kiếm</h3>
+                <p>Tìm kiếm nhanh tài liệu và hồ sơ. Kết quả chính xác và nhanh chóng.</p>
+                <a href="TIMKIEM/timkiem.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
 
     <script>
         const sidebar = document.querySelector('.sidebar');
         const mainContent = document.querySelector('.main-content');
         const header = document.querySelector('.header');
         const sidebarToggle = document.querySelector('#sidebarToggle');
-        const overlay = document.querySelector('#overlay');
 
-        // Toggle sidebar state
-        function toggleSidebar() {
+        // Handle sidebar toggle for mobile
+        sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
             mainContent.classList.toggle('sidebar-active');
             header.classList.toggle('sidebar-active');
-            sidebarToggle.classList.toggle('active');
-            overlay.classList.toggle('active');
+        });
+
+        // Handle hover events for desktop
+        if (window.innerWidth > 768) {
+            sidebar.addEventListener('mouseenter', () => {
+                mainContent.classList.add('sidebar-active');
+                header.classList.add('sidebar-active');
+            });
+
+            sidebar.addEventListener('mouseleave', () => {
+                mainContent.classList.remove('sidebar-active');
+                header.classList.remove('sidebar-active');
+            });
         }
-
-        // Toggle button click handler
-        sidebarToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleSidebar();
-        });
-
-        // Close sidebar when clicking overlay
-        overlay.addEventListener('click', () => {
-            toggleSidebar();
-        });
 
         // Close sidebar when clicking outside (mobile only)
         document.addEventListener('click', (e) => {
@@ -291,21 +404,17 @@
                     sidebar.classList.remove('active');
                     mainContent.classList.remove('sidebar-active');
                     header.classList.remove('sidebar-active');
-                    sidebarToggle.classList.remove('active');
-                    overlay.classList.remove('active');
                 }
             }
         });
 
         // Handle window resize
-        let timeout;
         window.addEventListener('resize', () => {
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-                if (window.innerWidth > 768) {
-                    overlay.classList.remove('active');
-                }
-            }, 250);
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                mainContent.classList.remove('sidebar-active');
+                header.classList.remove('sidebar-active');
+            }
         });
     </script>
 </body>
