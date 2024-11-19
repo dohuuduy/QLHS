@@ -1,41 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Quản Lý Tài Liệu</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
-<body>
-    <div class="container mt-4">
-        <h1 class="text-center">Quản Lý Hồ Sơ - Tài Liệu</h1>
-        <button class="btn btn-primary mb-3" data-toggle="modal" data-target="#documentFormModal">Thêm Tài Liệu</button>
-        <table class="table table-striped" id="documentTable">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên Tài Liệu</th>
-                    <th>Mô Tả</th>
-                    <th>Loại Tài Liệu</th>
-                    <th>Ngày Tạo</th>
-                    <th>Ngày Cập Nhật</th>
-                    <th>Hành Động</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <!-- Modal Form -->
-    <div class="modal fade" id="documentFormModal" tabindex="-1" aria-labelledby="documentFormModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="documentFormModalLabel">Thêm/Sửa Tài Liệu</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
 <form id="taiLieuForm">
   <input type="hidden" id="id" />
   <label for="tenTaiLieu">Tên tài liệu:</label>
@@ -59,14 +21,36 @@
   <button type="button" onclick="saveDocument()">Lưu</button>
 </form>
 
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
-    <script src="tailieu.js"></script>
-</body>
-</html>
+<script>
+  function saveDocument() {
+    const id = document.getElementById('id').value || '';
+    const tenTaiLieu = document.getElementById('tenTaiLieu').value;
+    const moTa = document.getElementById('moTa').value;
+    const loaiTaiLieu = document.getElementById('loaiTaiLieu').value;
+    const ngayTao = document.getElementById('ngayTao').value;
+    const ngayCapNhat = document.getElementById('ngayCapNhat').value;
+    const trangThai = document.getElementById('trangThai').value;
+    
+    const documentData = {
+      id: id,
+      ten_tai_lieu: tenTaiLieu,
+      mo_ta: moTa,
+      loai_tai_lieu: loaiTaiLieu,
+      ngay_tao: ngayTao,
+      ngay_cap_nhat: ngayCapNhat,
+      trang_thai: trangThai
+    };
+    
+    fetch('https://script.google.com/macros/s/AKfycbzRKtc6Dm_K8tnM8FI_CHgvlsg163rq4mj_t_6AjRV8Munno1zMKQDTxbzfJU5Vi_vh/exec', {
+      method: 'POST',
+      body: JSON.stringify(documentData),
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert('Dữ liệu đã được lưu thành công!');
+      // Reset form hoặc xử lý thêm nếu cần
+    })
+    .catch(error => alert('Có lỗi xảy ra!'));
+  }
+</script>
