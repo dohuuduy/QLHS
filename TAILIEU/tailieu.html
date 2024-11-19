@@ -36,18 +36,29 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="documentForm">
-                        <input type="hidden" id="documentId">
-                        <div class="form-group">
-                            <label for="ten_tai_lieu">Tên Tài Liệu</label>
-                            <input type="text" class="form-control" id="ten_tai_lieu" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="mo_ta">Mô Tả</label>
-                            <textarea class="form-control" id="mo_ta" rows="3" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Lưu</button>
-                    </form>
+<form id="taiLieuForm">
+  <input type="hidden" id="id" />
+  <label for="tenTaiLieu">Tên tài liệu:</label>
+  <input type="text" id="tenTaiLieu" required><br>
+  
+  <label for="moTa">Mô tả:</label>
+  <textarea id="moTa"></textarea><br>
+  
+  <label for="loaiTaiLieu">Loại tài liệu:</label>
+  <input type="text" id="loaiTaiLieu"><br>
+  
+  <label for="ngayTao">Ngày tạo:</label>
+  <input type="date" id="ngayTao"><br>
+  
+  <label for="ngayCapNhat">Ngày cập nhật:</label>
+  <input type="date" id="ngayCapNhat"><br>
+  
+  <label for="trangThai">Trạng thái:</label>
+  <input type="text" id="trangThai"><br>
+  
+  <button type="button" onclick="saveDocument()">Lưu</button>
+</form>
+
                 </div>
             </div>
         </div>
