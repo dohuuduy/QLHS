@@ -179,3 +179,84 @@ textarea {
 .btn-delete:hover {
     background-color: #c0392b;
 }
+/* Status Badge Styles */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-badge.hieuluc {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.status-badge.hethieuluc {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    border-radius: 4px;
+    color: white;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification.success {
+    background-color: #2ecc71;
+}
+
+.notification.error {
+    background-color: #e74c3c;
+}
+
+.notification.info {
+    background-color: #3498db;
+}
+
+/* Download Button Style */
+.btn-download {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-download:hover {
+    background-color: #219a52;
+}
+
+/* File Input Style */
+input[type="file"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* Required Field Style */
+.required::after {
+    content: '*';
+    color: #e74c3c;
+    margin-left: 4px;
+}
