@@ -86,23 +86,29 @@ function loadDocuments() {
 }
 
 function editDocument(id) {
+    // Gọi Web App với tham số ID để lấy dữ liệu chi tiết của tài liệu
     fetch(`${WEB_APP_URL}?id=${id}`)
         .then(response => response.json())
         .then(doc => {
-            document.getElementById('ten_tai_lieu').value = doc.ten_tai_lieu;
-            document.getElementById('mo_ta').value = doc.mo_ta;
+            if (doc && doc.ten_tai_lieu && doc.mo_ta) { // Kiểm tra dữ liệu có tồn tại và không bị undefined
+                document.getElementById('ten_tai_lieu').value = doc.ten_tai_lieu;
+                document.getElementById('mo_ta').value = doc.mo_ta;
 
-            isEditing = true; // Đặt trạng thái thành Sửa
-            editingId = id; // Lưu ID của tài liệu đang sửa
+                isEditing = true; // Đặt trạng thái thành Sửa
+                editingId = id; // Lưu ID của tài liệu đang sửa
 
-            document.getElementById('modalTitle').textContent = 'Sửa Tài Liệu';
-            $('#documentFormModal').modal('show'); // Hiển thị form modal
+                document.getElementById('modalTitle').textContent = 'Sửa Tài Liệu';
+                $('#documentFormModal').modal('show'); // Hiển thị form modal
+            } else {
+                alert('Không tìm thấy dữ liệu của tài liệu để chỉnh sửa. Vui lòng thử lại.');
+            }
         })
         .catch(error => {
             console.error('Lỗi khi tải dữ liệu để chỉnh sửa:', error);
             alert('Đã xảy ra lỗi khi tải dữ liệu để chỉnh sửa.');
         });
 }
+
 
 function deleteDocument(id) {
     if (confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) {
