@@ -1,56 +1,108 @@
-<form id="taiLieuForm">
-  <input type="hidden" id="id" />
-  <label for="tenTaiLieu">Tên tài liệu:</label>
-  <input type="text" id="tenTaiLieu" required><br>
-  
-  <label for="moTa">Mô tả:</label>
-  <textarea id="moTa"></textarea><br>
-  
-  <label for="loaiTaiLieu">Loại tài liệu:</label>
-  <input type="text" id="loaiTaiLieu"><br>
-  
-  <label for="ngayTao">Ngày tạo:</label>
-  <input type="date" id="ngayTao"><br>
-  
-  <label for="ngayCapNhat">Ngày cập nhật:</label>
-  <input type="date" id="ngayCapNhat"><br>
-  
-  <label for="trangThai">Trạng thái:</label>
-  <input type="text" id="trangThai"><br>
-  
-  <button type="button" onclick="saveDocument()">Lưu</button>
-</form>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Tài Liệu</title>
+    <link rel="stylesheet" href="tailieu_style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Hệ Thống Quản Lý Tài Liệu</h1>
+            <button id="btnAddNew" class="btn-primary">
+                <i class="fas fa-plus"></i> Thêm Tài Liệu Mới
+            </button>
+        </header>
 
-<script>
-  function saveDocument() {
-    const id = document.getElementById('id').value || '';
-    const tenTaiLieu = document.getElementById('tenTaiLieu').value;
-    const moTa = document.getElementById('moTa').value;
-    const loaiTaiLieu = document.getElementById('loaiTaiLieu').value;
-    const ngayTao = document.getElementById('ngayTao').value;
-    const ngayCapNhat = document.getElementById('ngayCapNhat').value;
-    const trangThai = document.getElementById('trangThai').value;
-    
-    const documentData = {
-      id: id,
-      ten_tai_lieu: tenTaiLieu,
-      mo_ta: moTa,
-      loai_tai_lieu: loaiTaiLieu,
-      ngay_tao: ngayTao,
-      ngay_cap_nhat: ngayCapNhat,
-      trang_thai: trangThai
-    };
-    
-    fetch('https://script.google.com/macros/s/AKfycbzRKtc6Dm_K8tnM8FI_CHgvlsg163rq4mj_t_6AjRV8Munno1zMKQDTxbzfJU5Vi_vh/exec', {
-      method: 'POST',
-      body: JSON.stringify(documentData),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(data => {
-      alert('Dữ liệu đã được lưu thành công!');
-      // Reset form hoặc xử lý thêm nếu cần
-    })
-    .catch(error => alert('Có lỗi xảy ra!'));
-  }
-</script>
+        <main>
+            <!-- Bảng hiển thị danh sách tài liệu -->
+            <div class="table-container">
+                <table id="documentTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên Tài Liệu</th>
+                            <th>Mô Tả</th>
+                            <th>Loại Tài Liệu</th>
+                            <th>Tiêu Chuẩn</th>
+                            <th>Phiên Bản</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="documentTableBody">
+                        <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Form thêm/sửa tài liệu -->
+            <div id="documentModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h2 id="modalTitle">Thêm Tài Liệu Mới</h2>
+                    <form id="documentForm">
+                        <input type="hidden" id="documentId">
+                        
+                        <div class="form-group">
+                            <label for="tenTaiLieu">Tên Tài Liệu:</label>
+                            <input type="text" id="tenTaiLieu" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="moTa">Mô Tả:</label>
+                            <textarea id="moTa" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="loaiTaiLieu">Loại Tài Liệu:</label>
+                            <select id="loaiTaiLieu" required>
+                                <option value="">Chọn loại tài liệu</option>
+                                <option value="vanban">Văn bản</option>
+                                <option value="huongdan">Hướng dẫn</option>
+                                <option value="baocao">Báo cáo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tieuChuan">Tiêu Chuẩn:</label>
+                            <select id="tieuChuan" required>
+                                <option value="">Chọn tiêu chuẩn</option>
+                                <option value="iso">ISO</option>
+                                <option value="haccp">HACCP</option>
+                                <option value="gmp">GMP</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phienBan">Phiên Bản:</label>
+                            <input type="text" id="phienBan" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="trangThai">Trạng Thái:</label>
+                            <select id="trangThai" required>
+                                <option value="hieuluc">Hiệu lực</option>
+                                <option value="hethieuluc">Hết hiệu lực</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fileDinhKem">File Đính Kèm:</label>
+                            <input type="file" id="fileDinhKem">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Lưu</button>
+                            <button type="button" class="btn-secondary" onclick="closeModal()">Hủy</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="tailieu_script.js"></script>
+</body>
+</html>
