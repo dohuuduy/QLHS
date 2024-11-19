@@ -53,37 +53,23 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadDocuments() {
-    fetch(WEB_APP_URL)
+    fetch(`${WEB_APP_URL}`)
         .then(response => response.json())
         .then(data => {
-            const tableBody = document.querySelector('#documentTable tbody');
-            tableBody.innerHTML = '';
-            data.forEach(doc => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${doc.id}</td>
-                    <td>${doc.ten_tai_lieu}</td>
-                    <td>${doc.mo_ta}</td>
-                    <td>${doc.loai_tai_lieu}</td>
-                    <td>${doc.ngay_tao}</td>
-                    <td>${doc.ngay_cap_nhat}</td>
-                    <td>
-                        <button class="btn btn-success btn-sm" onclick="editDocument('${doc.id}')">
-                            <i class="fas fa-edit"></i> Sửa
-                        </button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteDocument('${doc.id}')">
-                            <i class="fas fa-trash"></i> Xóa
-                        </button>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
+            // Kiểm tra dữ liệu có nhận được đúng không
+            if (Array.isArray(data)) {
+                console.log("Dữ liệu tải thành công:", data);
+                // Tiếp tục xử lý để hiển thị dữ liệu
+            } else {
+                throw new Error("Dữ liệu không đúng định dạng");
+            }
         })
         .catch(error => {
-            console.error('Lỗi khi tải dữ liệu:', error);
-            alert('Đã xảy ra lỗi khi tải dữ liệu.');
+            console.error("Lỗi khi tải dữ liệu:", error);
+            alert("Đã xảy ra lỗi khi tải dữ liệu.");
         });
 }
+
 
 function editDocument(id) {
     // Gọi Web App với tham số ID để lấy dữ liệu chi tiết của tài liệu
