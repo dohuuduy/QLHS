@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Quản Lý Hồ Sơ Tài Liệu</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -14,100 +13,309 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --hover-color: #2980b9;
-            --text-light: #ffffff;
-            --text-dark: #2c3e50;
-            --sidebar-width: 250px;
-            --header-height: 60px;
-            --transition-speed: 0.3s;
-        }
-
-        #loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            opacity: 1;
-            transition: opacity 0.3s;
-        }
-
-        #loader.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid var(--secondary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         body {
             background-color: #f5f5f5;
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
+        /* Sidebar styles */
+        .sidebar {
+            background: #2c3e50;
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar .profile {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .sidebar .profile img {
+            display: block;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto;
+            border: 4px solid #fff;
+        }
+
+        .sidebar .profile h3 {
+            color: #ffffff;
+            margin: 10px 0 5px;
+        }
+
+        .sidebar .profile p {
+            color: rgb(206, 240, 253);
+            font-size: 14px;
+        }
+
+        .sidebar ul li a {
+            display: block;
+            padding: 13px 30px;
+            border-bottom: 1px solid #3498db;
+            color: rgb(241, 237, 237);
+            font-size: 16px;
+            position: relative;
+            text-decoration: none;
+        }
+
+        .sidebar ul li a:hover,
+        .sidebar ul li a.active {
+            color: #0c7db1;
+            background: white;
+            border-right: 2px solid rgb(5, 68, 104);
+        }
+
+        .sidebar ul li a i {
+            margin-right: 15px;
+        }
+
+        /* Trigger area */
+        .sidebar-trigger {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 20px;
+            height: 100%;
+            z-index: 999;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .sidebar-trigger:hover + .sidebar,
+        .sidebar:hover {
+            left: 0;
+        }
+
+        /* Header styles */
         .header {
-            background: var(--text-light);
-            height: var(--header-height);
-            padding-left: 80px;
+            background: #fff;
+            height: 60px;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
             position: fixed;
             top: 0;
             right: 0;
-            left: 0;
+            left: 20px;
             z-index: 100;
-            transition: all var(--transition-speed) ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
+        .header.sidebar-active {
+            left: 250px;
+        }
+
+        .header-left h2 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .notifications {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .notifications .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Main content */
         .main-content {
-            margin-top: var(--header-height);
+            margin-left: 20px;
+            margin-top: 60px;
             padding: 20px;
-            transition: all var(--transition-speed) ease;
+            transition: all 0.3s ease;
         }
 
         .main-content.sidebar-active {
-            margin-left: var(--sidebar-width);
+            margin-left: 250px;
         }
 
-        /* Giữ nguyên các style khác như cũ */
-        [Previous CSS remains the same]
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .card-icon {
+            font-size: 2em;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .card-link {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .card-link:hover {
+            background-color: #2980b9;
+        }
+
+        /* Mobile toggle button */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .sidebar-toggle {
+                display: block;
+            }
+
+            .sidebar-trigger {
+                display: none;
+            }
+
+            .sidebar {
+                left: -250px;
+            }
+
+            .header, .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .header {
+                left: 0;
+                padding-left: 60px;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Loader -->
-    <div id="loader">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <!-- Toggle Button -->
-    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle Sidebar">
+    <!-- Mobile Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">
         <i class="fas fa-bars"></i>
     </button>
 
+    <!-- Trigger Area -->
+    <div class="sidebar-trigger"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="profile">
+            <img src="/api/placeholder/100/100" alt="profile_picture">
+            <h3>QLHS System</h3>
+            <p>Quản lý hồ sơ</p>
+        </div>
+
+        <ul>
+            <li>
+                <a href="#" class="active">
+                    <i class="fas fa-home"></i>
+                    <span>Trang Chủ</span>
+                </a>
+            </li>
+            <li>
+                <a href="TAILIEU/tailieu.html">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Quản Lý Tài Liệu</span>
+                </a>
+            </li>
+            <li>
+                <a href="HOSO/hoso.html">
+                    <i class="fas fa-folder"></i>
+                    <span>Hồ Sơ</span>
+                </a>
+            </li>
+            <li>
+                <a href="THONGKE/thongke.html">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Thống Kê</span>
+                </a>
+            </li>
+            <li>
+                <a href="TIMKIEM/timkiem.html">
+                    <i class="fas fa-search"></i>
+                    <span>Tìm Kiếm</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-cog"></i>
+                    <span>Cài Đặt</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
     <!-- Header -->
-    <header class="header" id="header">
+    <div class="header">
         <div class="header-left">
             <h2>Hệ Thống Quản Lý Hồ Sơ Tài Liệu</h2>
         </div>
@@ -120,82 +328,93 @@
                 <i class="fas fa-user"></i>
             </div>
         </div>
-    </header>
-
-    <!-- Sidebar -->
-    <nav class="sidebar" id="sidebar">
-        <div class="profile">
-            <img src="/api/placeholder/100/100" alt="Profile Picture">
-            <i class="fas fa-user-shield profile-icon"></i>
-            <h3>QLHS System</h3>
-            <p>Quản lý hồ sơ</p>
-        </div>
-
-        <ul>
-            <li>
-                <a href="index.html" class="active">
-                    <i class="fas fa-home"></i>
-                    <span>Trang Chủ</span>
-                </a>
-            </li>
-            <li>
-                <a href="tai_lieu.html">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Quản Lý Tài Liệu</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+    </div>
 
     <!-- Main Content -->
-    <main class="main-content" id="mainContent">
-        <h1>Nội dung chính</h1>
-        <p>Đây là nội dung của trang web...</p>
-    </main>
+    <div class="main-content">
+        <div class="cards-container">
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3>Quản Lý Tài Liệu</h3>
+                <p>Quản lý và tổ chức các tài liệu, văn bản theo danh mục. Dễ dàng truy cập và cập nhật.</p>
+                <a href="TAILIEU/tailieu.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-folder"></i>
+                </div>
+                <h3>Hồ Sơ</h3>
+                <p>Xem và quản lý hồ sơ cá nhân, đơn vị. Cập nhật thông tin một cách hiệu quả.</p>
+                <a href="HOSO/hoso.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3>Thống Kê</h3>
+                <p>Xem báo cáo và thống kê tổng quan. Phân tích dữ liệu chi tiết.</p>
+                <a href="THONGKE/thongke.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>Tìm Kiếm</h3>
+                <p>Tìm kiếm nhanh tài liệu và hồ sơ. Kết quả chính xác và nhanh chóng.</p>
+                <a href="TIMKIEM/timkiem.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Loader handling
-        window.addEventListener('load', function() {
-            const loader = document.getElementById('loader');
-            
-            // Đảm bảo loader biến mất sau khi trang đã tải xong
-            loader.classList.add('hidden');
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 300);
-        });
+        const sidebar = document.querySelector('.sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const header = document.querySelector('.header');
+        const sidebarToggle = document.querySelector('#sidebarToggle');
 
-        // Navigation handling
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                if (this.getAttribute('href') !== '#') {
-                    e.preventDefault();
-                    const loader = document.getElementById('loader');
-                    const href = this.getAttribute('href');
-
-                    // Hiển thị loader
-                    loader.style.display = 'flex';
-                    loader.classList.remove('hidden');
-
-                    // Chuyển trang sau 300ms
-                    setTimeout(() => {
-                        window.location.href = href;
-                    }, 300);
-                }
-            });
-        });
-
-        // Sidebar toggle
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('mainContent');
-        const header = document.getElementById('header');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
+        // Handle sidebar toggle for mobile
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
             mainContent.classList.toggle('sidebar-active');
             header.classList.toggle('sidebar-active');
-            sidebarToggle.classList.toggle('active');
+        });
+
+        // Handle hover events for desktop
+        if (window.innerWidth > 768) {
+            sidebar.addEventListener('mouseenter', () => {
+                mainContent.classList.add('sidebar-active');
+                header.classList.add('sidebar-active');
+            });
+
+            sidebar.addEventListener('mouseleave', () => {
+                mainContent.classList.remove('sidebar-active');
+                header.classList.remove('sidebar-active');
+            });
+        }
+
+        // Close sidebar when clicking outside (mobile only)
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                    header.classList.remove('sidebar-active');
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+                mainContent.classList.remove('sidebar-active');
+                header.classList.remove('sidebar-active');
+            }
         });
     </script>
 </body>
