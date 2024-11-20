@@ -3,468 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Hồ Sơ Tài Liệu</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Profile QLHS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #f5f5f5;
-            min-height: 100vh;
-        }
-
-        /* Loading overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
+        .profile-container {
             display: flex;
-            justify-content: center;
             align-items: center;
-            z-index: 9999;
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.3s;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f5f5f5;
+            border-radius: 10px;
         }
 
-        .loading-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Sidebar styles */
-        .sidebar {
-            background: #2c3e50;
-            position: fixed;
-            top: 0;
-            left: -250px;
-            width: 250px;
-            height: 100%;
-            padding: 20px 0;
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-
-        .sidebar.active {
-            left: 0;
-        }
-
-        .logo-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .logo-container img {
-            width: 120px;
-            height: auto;
-        }
-
-        .sidebar .profile {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .sidebar .profile img {
-            display: block;
+        .profile-icon {
             width: 100px;
             height: 100px;
+            background: #3498db;
             border-radius: 50%;
-            margin: 0 auto;
-            border: 4px solid #fff;
-        }
-
-        .sidebar .profile h3 {
-            color: #ffffff;
-            margin: 10px 0 5px;
-        }
-
-        .sidebar .profile p {
-            color: rgb(206, 240, 253);
-            font-size: 14px;
-        }
-
-        .sidebar ul li a {
-            display: block;
-            padding: 13px 30px;
-            border-bottom: 1px solid #3498db;
-            color: rgb(241, 237, 237);
-            font-size: 16px;
-            position: relative;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar ul li a:hover,
-        .sidebar ul li a.active {
-            color: #0c7db1;
-            background: white;
-            border-right: 2px solid rgb(5, 68, 104);
-        }
-
-        .sidebar ul li a i {
-            margin-right: 15px;
-        }
-
-        /* Header styles */
-        .header {
-            background: #fff;
-            height: 60px;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            right: 0;
-            left: 0;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
-
-        .header.sidebar-active {
-            left: 250px;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .sidebar-toggle {
-            background: none;
-            border: none;
-            color: #2c3e50;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-toggle:hover {
-            color: #3498db;
-        }
-
-        .header-left h2 {
-            color: #2c3e50;
-            font-weight: 600;
-            font-size: 1.4rem;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .notifications {
-            position: relative;
-            cursor: pointer;
-        }
-
-        .notifications .badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #e74c3c;
-            color: white;
-            border-radius: 50%;
-            width: 15px;
-            height: 15px;
-            font-size: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-right: 20px;
         }
 
-        /* Main content */
-        .main-content {
-            margin-top: 60px;
-            padding: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .main-content.sidebar-active {
-            margin-left: 250px;
-        }
-
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .card h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
-        .card-icon {
-            font-size: 2em;
-            color: #3498db;
-            margin-bottom: 15px;
-        }
-
-        .card p {
-            color: #666;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-
-        .card-link {
-            display: inline-block;
-            padding: 8px 20px;
-            background-color: #3498db;
+        .profile-icon i {
+            font-size: 40px;
             color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
         }
 
-        .card-link:hover {
-            background-color: #2980b9;
+        .profile-info {
+            flex: 1;
         }
 
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .header-left h2 {
-                font-size: 1.1rem;
-            }
-
-            .cards-container {
-                grid-template-columns: 1fr;
-                padding: 10px;
-            }
-
-            .main-content {
-                padding: 10px;
-            }
+        .profile-info h2 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
         }
 
-        @media (max-width: 480px) {
-            .header-left h2 {
-                font-size: 0.9rem;
-            }
+        .profile-info p {
+            margin: 5px 0;
+            color: #7f8c8d;
         }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay">
-        <div class="spinner"></div>
-    </div>
-
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="logo-container">
-            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAiIGhlaWdodD0iNDAiPjxyZWN0IHdpZHRoPSIxMjAiIGhlaWdodD0iNDAiIGZpbGw9IiMzNDk4ZGIiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2Ij5RTEhTPC90ZXh0Pjwvc3ZnPg==" alt="QLHS Logo">
+    <div class="profile-container">
+        <div class="profile-icon">
+            <i class="fas fa-user-graduate"></i>
         </div>
-
-        <div class="profile">
-            <img src="/api/placeholder/100/100" alt="profile_picture">
-            <h3>QLHS System</h3>
-            <p>Quản lý hồ sơ</p>
-        </div>
-
-        <ul>
-            <li>
-                <a href="#" class="active">
-                    <i class="fas fa-home"></i>
-                    <span>Trang Chủ</span>
-                </a>
-            </li>
-            <li>
-                <a href="TAILIEU/tailieu.html">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Quản Lý Tài Liệu</span>
-                </a>
-            </li>
-            <li>
-                <a href="HOSO/hoso.html">
-                    <i class="fas fa-folder"></i>
-                    <span>Hồ Sơ</span>
-                </a>
-            </li>
-            <li>
-                <a href="THONGKE/thongke.html">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Thống Kê</span>
-                </a>
-            </li>
-            <li>
-                <a href="TIMKIEM/timkiem.html">
-                    <i class="fas fa-search"></i>
-                    <span>Tìm Kiếm</span>
-                </a>
-            </li>
-            <li>
-                <a href="#">
-                    <i class="fas fa-cog"></i>
-                    <span>Cài Đặt</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-
-    <!-- Header -->
-    <div class="header">
-        <div class="header-left">
-            <button class="sidebar-toggle" id="sidebarToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <h2>Hệ Thống Quản Lý Hồ Sơ Tài Liệu</h2>
-        </div>
-        <div class="header-right">
-            <div class="notifications">
-                <i class="fas fa-bell"></i>
-                <span class="badge">3</span>
-            </div>
-            <div class="user-profile">
-                <i class="fas fa-user"></i>
-            </div>
+        <div class="profile-info">
+            <h2>Quản Lý Học Sinh</h2>
+            <p>Hệ thống quản lý thông tin học sinh</p>
         </div>
     </div>
-
-    <!-- Main Content -->
-    <div class="main-content">
-        <div class="cards-container">
-            <div class="card">
-                <div class="card-icon">
-                    <i class="fas fa-file-alt"></i>
-                </div>
-                <h3>Quản Lý Tài Liệu</h3>
-                <p>Quản lý và tổ chức các tài liệu, văn bản theo danh mục. Dễ dàng truy cập và cập nhật.</p>
-                <a href="TAILIEU/tailieu.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
-            </div>
-
-            <div class="card">
-                <div class="card-icon">
-                    <i class="fas fa-folder"></i>
-                </div>
-                <h3>Hồ Sơ</h3>
-                <p>Xem và quản lý hồ sơ cá nhân, đơn vị. Cập nhật thông tin một cách hiệu quả.</p>
-                <a href="HOSO/hoso.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
-            </div>
-
-            <div class="card">
-                <div class="card-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <h3>Thống Kê</h3>
-                <p>Xem báo cáo và thống kê tổng quan. Phân tích dữ liệu chi tiết.</p>
-                <a href="THONGKE/thongke.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
-            </div>
-
-            <div class="card">
-                <div class="card-icon">
-                    <i class="fas fa-search"></i>
-                </div>
-                <h3>Tìm Kiếm</h3>
-                <p>Tìm kiếm nhanh tài liệu và hồ sơ. Kết quả chính xác và nhanh chóng.</p>
-                <a href="TIMKIEM/timkiem.html" class="card-link">Truy cập <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content');
-        const header = document.querySelector('.header');
-        const sidebarToggle = document.querySelector('#sidebarToggle');
-        const loadingOverlay = document.querySelector('.loading-overlay');
-
-        // Show loading overlay
-        function showLoading() {
-            loadingOverlay.classList.add('active');
-        }
-
-        // Hide loading overlay
-        function hideLoading() {
-            loadingOverlay.classList.remove('active');
-        }
-
-        // Simulate page loading
-        window.addEventListener('load', () => {
-            showLoading();
-            setTimeout(hideLoading, 1000);
-        });
-
-        // Handle link clicks
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                if (!link.classList.contains('card-link')) return;
-                e.preventDefault();
-                showLoading();
-                setTimeout(() => {
-                    window.location.href = link.href;
-                }, 500);
-            });
-        });
-
-        // Handle sidebar toggle
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
-            mainContent.classList.toggle('sidebar-active');
-            header.classList.toggle('sidebar-active');
-        });
-
-        // Close sidebar when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target) && sidebar.classList.contains('active')) {
-                sidebar.classList.remove('active');
-                mainContent.classList.remove('sidebar-active');
-                header.classList.remove('sidebar-active');
-            }
-        });
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('active');
-                mainContent.classList.remove('sidebar-active');
-                header.classList.remove('sidebar-active');
-            }
-        });
-    </script>
 </body>
 </html>
