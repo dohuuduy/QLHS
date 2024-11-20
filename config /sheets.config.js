@@ -1,7 +1,7 @@
 // config/sheets.config.js
 
 // Thông tin từ Google Cloud Console
-const SPREADSHEET_ID = 'your-spreadsheet-id';
+const SPREADSHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
 const SHEET_NAME = 'TAI_LIEU';
 const CREDENTIALS_PATH = './config/credentials.json';
 
