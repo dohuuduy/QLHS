@@ -30,15 +30,68 @@
             z-index: 1000;
         }
 
-        .sidebar.collapsed {
-            width: 70px;
-        }
+        .sidebar.collapsed .profile-icon {
+        width: 45px;
+        height: 45px;
+        margin: 0 auto;
+    }
 
-        .sidebar.collapsed .profile-section h3,
-        .sidebar.collapsed .profile-section p,
-        .sidebar.collapsed .menu-item span {
-            display: none;
-        }
+    .sidebar.collapsed .profile-icon i {
+        font-size: 20px;
+    }
+
+    .profile-section {
+        text-align: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .sidebar.collapsed .profile-section {
+        padding: 10px;
+    }
+
+    /* Thêm transition cho profile icon */
+    .profile-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        border: 2px solid rgba(255,255,255,0.3);
+        transition: all 0.3s ease;
+    }
+
+    .profile-icon i {
+        font-size: 35px;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    /* Điều chỉnh vị trí toggle button */
+    .toggle-btn {
+        position: absolute;
+        top: 20px;
+        right: -15px;
+        width: 30px;
+        height: 30px;
+        background: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        z-index: 1001;
+        transition: all 0.3s ease;
+    }
+
+    .sidebar.collapsed .toggle-btn {
+        right: -15px;
+    }
 
         .toggle-btn {
             position: absolute;
@@ -142,7 +195,7 @@
                     <i class="fas fa-home"></i>
                     <span>Trang chủ</span>
                 </a>
-                <a href="tailieu.html" class="menu-item">
+                <a href="QLHS/TAILIEU/tailieu.html" class="menu-item">
                     <i class="fas fa-users"></i>
                     <span>Quản lý học sinh</span>
                 </a>
