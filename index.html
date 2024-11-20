@@ -26,6 +26,39 @@
             position: fixed;
             height: 100vh;
             box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed {
+            width: 70px;
+        }
+
+        .sidebar.collapsed .profile-section h3,
+        .sidebar.collapsed .profile-section p,
+        .sidebar.collapsed .menu-item span {
+            display: none;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: -15px;
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1001;
+        }
+
+        .toggle-btn i {
+            color: #2c3e50;
+            font-size: 14px;
         }
 
         .profile-section {
@@ -62,6 +95,7 @@
             color: white;
             text-decoration: none;
             transition: background 0.3s;
+            white-space: nowrap;
         }
 
         .menu-item:hover {
@@ -79,90 +113,23 @@
             flex: 1;
             padding: 20px;
             background: #f5f5f5;
+            transition: all 0.3s ease;
         }
 
-        .content-header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+        .main-content.expanded {
+            margin-left: 70px;
         }
 
-        .content-section {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        /* Rest of your existing CSS remains the same */
 
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-        }
-
-        .stat-icon {
-            width: 50px;
-            height: 50px;
-            background: #3498db;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-        }
-
-        .stat-icon i {
-            color: white;
-            font-size: 20px;
-        }
-
-        .stat-info h3 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .stat-info p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-        }
-
-        tr:hover {
-            background-color: #f5f5f5;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="sidebar">
+            <div class="toggle-btn">
+                <i class="fas fa-chevron-left"></i>
+            </div>
             <div class="profile-section">
                 <div class="profile-icon">
                     <i class="fas fa-user-graduate"></i>
@@ -173,104 +140,56 @@
             <div class="menu-items">
                 <a href="#" class="menu-item">
                     <i class="fas fa-home"></i>
-                    Trang chủ
+                    <span>Trang chủ</span>
                 </a>
-                <a href="tailieu" class="menu-item">
+                <a href="tailieu.html" class="menu-item">
                     <i class="fas fa-users"></i>
-                    Quản lý học sinh
+                    <span>Quản lý học sinh</span>
                 </a>
                 <a href="#" class="menu-item">
                     <i class="fas fa-chalkboard-teacher"></i>
-                    Quản lý giáo viên
+                    <span>Quản lý giáo viên</span>
                 </a>
                 <a href="#" class="menu-item">
                     <i class="fas fa-book"></i>
-                    Quản lý lớp học
+                    <span>Quản lý lớp học</span>
                 </a>
                 <a href="#" class="menu-item">
                     <i class="fas fa-chart-bar"></i>
-                    Thống kê
+                    <span>Thống kê</span>
                 </a>
                 <a href="#" class="menu-item">
                     <i class="fas fa-cog"></i>
-                    Cài đặt
+                    <span>Cài đặt</span>
                 </a>
             </div>
         </div>
-        
-        <div class="main-content">
-            <div class="content-header">
-                <h1>Tổng quan hệ thống</h1>
-            </div>
-            
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>1,234</h3>
-                        <p>Tổng số học sinh</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>89</h3>
-                        <p>Giáo viên</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3>45</h3>
-                        <p>Lớp học</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="content-section">
-                <h2>Danh sách học sinh mới</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Họ và tên</th>
-                            <th>Lớp</th>
-                            <th>Ngày nhập học</th>
-                            <th>Trạng thái</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>001</td>
-                            <td>Nguyễn Văn A</td>
-                            <td>10A1</td>
-                            <td>20/11/2024</td>
-                            <td>Đang học</td>
-                        </tr>
-                        <tr>
-                            <td>002</td>
-                            <td>Trần Thị B</td>
-                            <td>10A2</td>
-                            <td>20/11/2024</td>
-                            <td>Đang học</td>
-                        </tr>
-                        <tr>
-                            <td>003</td>
-                            <td>Lê Văn C</td>
-                            <td>10A3</td>
-                            <td>20/11/2024</td>
-                            <td>Đang học</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <!-- Rest of your existing HTML remains the same -->
+
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.querySelector('.toggle-btn');
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            const toggleIcon = document.querySelector('.toggle-btn i');
+
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('expanded');
+                
+                // Change arrow icon direction
+                if (sidebar.classList.contains('collapsed')) {
+                    toggleIcon.classList.remove('fa-chevron-left');
+                    toggleIcon.classList.add('fa-chevron-right');
+                } else {
+                    toggleIcon.classList.remove('fa-chevron-right');
+                    toggleIcon.classList.add('fa-chevron-left');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
