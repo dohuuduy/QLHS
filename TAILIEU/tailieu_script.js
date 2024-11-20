@@ -1,3 +1,4 @@
+import { sheetsService } from './services/sheetsService.js';
 // Khai báo biến toàn cục
 let documents = [];
 let currentDocumentId = null;
@@ -23,26 +24,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // Hàm load dữ liệu từ Google Sheets
 async function loadDocuments() {
     try {
-        // Giả lập dữ liệu (sau này sẽ thay bằng Google Sheets API)
-        documents = [
-            {
-                id: '001',
-                ten_tai_lieu: 'Tài liệu mẫu',
-                mo_ta: 'Mô tả tài liệu mẫu',
-                loai_tai_lieu: 'vanban',
-                tieu_chuan: 'iso',
-                phien_ban_hien_tai: '1.0',
-                trang_thai: 'hieuluc',
-                ngay_tao: new Date().toISOString(),
-                nguoi_tao: 'user@example.com',
-                ngay_cap_nhat: new Date().toISOString(),
-                nguoi_cap_nhat: 'user@example.com',
-                file_dinh_kem: ''
-            }
-        ];
+        documents = await sheetsService.getAllDocuments();
         renderDocumentTable();
     } catch (error) {
-        showNotification('Lỗi khi tải dữ liệu', 'error');
+        showNotification('Lỗi khi tải dữ liệu: ' + error.message, 'error');
     }
 }
 
@@ -198,28 +183,35 @@ async function handleFormSubmit(e) {
 
 // Hàm thêm tài liệu mới
 async function addDocument(document) {
-    // Giả lập thêm vào Google Sheets
-    documents.push(document);
+    try {
+        await sheetsService.addDocument(document);
+        showNotification('Thêm tài liệu thành công!', 'success');
+    } catch (error) {
+        showNotification('Lỗi khi thêm tài liệu: ' + error.message, 'error');
+        throw error;
+    }
 }
 
 // Hàm cập nhật tài liệu
-async function updateDocument(id, updateData) {
-    // Giả lập cập nhật Google Sheets
-    const index = documents.findIndex(doc => doc.id === id);
-    if (index !== -1) {
-        documents[index] = { ...documents[index], ...updateData };
+async function updateDocument(id, document) {
+    try {
+        await sheetsService.updateDocument(id, document);
+        showNotification('Cập nhật tài liệu thành công!', 'success');
+    } catch (error) {
+        showNotification('Lỗi khi cập nhật tài liệu: ' + error.message, 'error');
+        throw error;
     }
 }
 
 // Hàm xóa tài liệu
 async function deleteDocument(id) {
     try {
-        // Giả lập xóa từ Google Sheets
-        documents = documents.filter(doc => doc.id !== id);
+        await sheetsService.deleteDocument(id);
         showNotification('Xóa tài liệu thành công!', 'success');
-        loadDocuments(); // Tải lại dữ liệu
+        loadDocuments();
     } catch (error) {
-        showNotification('Lỗi khi xóa tài liệu', 'error');
+        showNotification('Lỗi khi xóa tài liệu: ' + error.message, 'error');
+        throw error;
     }
 }
 
