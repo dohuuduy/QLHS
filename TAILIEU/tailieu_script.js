@@ -31,19 +31,33 @@ document.addEventListener('DOMContentLoaded', function() {
 // Hàm load danh sách tài liệu từ Google Sheet
 async function loadDocuments() {
     try {
-        const response = await fetch(`${WEB_APP_URL}?action=get&sheetName=${SHEET_NAME}`);
-        const data = await response.json();
+        console.log('Full URL:', `${WEB_APP_URL}?action=get&sheetName=${SHEET_NAME}`);
+        
+        const response = await fetch(`${WEB_APP_URL}?action=get&sheetName=${SHEET_NAME}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
-        // Hủy DataTable cũ nếu tồn tại
+        console.log('Response Status:', response.status);
+        
+        // In ra toàn bộ nội dung phản hồi
+        const responseText = await response.text();
+        console.log('Raw Response:', responseText);
+
+        // Thử parse JSON
+        const data = JSON.parse(responseText);
+        console.log('Parsed Data:', data);
+
+        // Phần code còn lại giữ nguyên
         if (documentDataTable) {
             documentDataTable.destroy();
         }
 
-        // Xóa dữ liệu cũ
         const documentTableBody = document.getElementById('documentTableBody');
         documentTableBody.innerHTML = '';
 
-        // Render dữ liệu mới
         data.forEach(doc => {
             const row = `
                 <tr data-id="${doc.id}">
@@ -72,7 +86,6 @@ async function loadDocuments() {
             documentTableBody.insertAdjacentHTML('beforeend', row);
         });
 
-        // Khởi tạo DataTable
         documentDataTable = $('#documentTable').DataTable({
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/vi.json'
@@ -82,8 +95,8 @@ async function loadDocuments() {
         });
 
     } catch (error) {
-        showAlert('Lỗi', 'Không thể tải danh sách tài liệu', 'danger');
-        console.error('Lỗi tải danh sách tài liệu:', error);
+        console.error('Chi tiết lỗi:', error);
+        showAlert('Lỗi', 'Không thể tải danh sách tài liệu. Chi tiết lỗi đã được ghi trong console.', 'danger');
     }
 }
 
@@ -217,9 +230,13 @@ async function saveDocument(modal) {
     };
 
     try {
-        await fetch(WEB_APP_URL, {
+        console.log('Save Document Data:', documentData);
+        
+        const response = await fetch(WEB_APP_URL, {
             method: 'POST',
-            mode: 'no-cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
             body: JSON.stringify({
                 action: documentData.id ? 'update' : 'add',
                 sheetName: SHEET_NAME,
@@ -227,12 +244,26 @@ async function saveDocument(modal) {
             })
         });
 
-        showAlert('Thành Công', 'Tài liệu đã được lưu', 'success');
-        modal.hide();
-        loadDocuments();
+        console.log('Save Response Status:', response.status);
+        
+        // Đọc nội dung phản hồi
+        const responseText = await response.text();
+        console.log('Save Response Text:', responseText);
+
+        // Thử parse JSON
+        const result = JSON.parse(responseText);
+        console.log('Save Result:', result);
+
+        if (result.status === 'success') {
+            showAlert('Thành Công', 'Tài liệu đã được lưu', 'success');
+            modal.hide();
+            loadDocuments();
+        } else {
+            showAlert('Lỗi', result.message || 'Không thể lưu tài liệu', 'danger');
+        }
     } catch (error) {
-        showAlert('Lỗi', 'Không thể lưu tài liệu', 'danger');
-        console.error('Lỗi lưu tài liệu:', error);
+        console.error('Chi tiết lỗi lưu:', error);
+        showAlert('Lỗi', 'Không thể lưu tài liệu. Chi tiết lỗi đã được ghi trong console.', 'danger');
     }
 }
 
