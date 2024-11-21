@@ -1,7 +1,7 @@
 // Configuration and Initialization
 const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
 const SHEET_NAME = 'TAI_LIEU';
-const API_KEY = 'YOUR_GOOGLE_SHEETS_API_KEY'; // Replace with your actual API key
+const API_KEY = 'ce0cef083062eefdbe4e95478d4f88f71a92cfa2'; // Replace with your actual API key
 const BASE_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}`;
 
 // DOM Elements
