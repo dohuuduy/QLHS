@@ -1,254 +1,169 @@
-import { sheetsService } from './services/sheetsService.js';
-// Khai báo biến toàn cục
-let documents = [];
-let currentDocumentId = null;
+// Configuration and Initialization
+const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
+const SHEET_NAME = 'TAI_LIEU';
+const API_KEY = 'YOUR_GOOGLE_SHEETS_API_KEY'; // Replace with your actual API key
+const BASE_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}`;
 
-// Khởi tạo khi trang được load
-document.addEventListener('DOMContentLoaded', function() {
-    // Load dữ liệu ban đầu
-    loadDocuments();
+// DOM Elements
+const documentTable = document.getElementById('documentTableBody');
+const documentModal = document.getElementById('documentModal');
+const btnAddNew = document.getElementById('btnAddNew');
+const closeModalBtn = document.querySelector('.close');
+const documentForm = document.getElementById('documentForm');
 
-    // Thêm event listeners
-    document.getElementById('btnAddNew').addEventListener('click', showAddModal);
-    document.getElementById('documentForm').addEventListener('submit', handleFormSubmit);
-    document.querySelector('.close').addEventListener('click', closeModal);
+// Event Listeners
+document.addEventListener('DOMContentLoaded', loadDocuments);
+btnAddNew.addEventListener('click', openAddModal);
+closeModalBtn.addEventListener('click', closeModal);
+documentForm.addEventListener('submit', saveDocument);
 
-    // Đóng modal khi click ra ngoài
-    window.addEventListener('click', function(event) {
-        if (event.target === document.getElementById('documentModal')) {
-            closeModal();
-        }
-    });
-});
-
-// Hàm load dữ liệu từ Google Sheets
+// Load Documents from Google Sheets
 async function loadDocuments() {
     try {
-        documents = await sheetsService.getAllDocuments();
-        renderDocumentTable();
+        const response = await fetch(`${BASE_URL}!A:G?key=${API_KEY}`);
+        const data = await response.json();
+        
+        // Clear existing table rows
+        documentTable.innerHTML = '';
+        
+        // Skip header row
+        const documents = data.values.slice(1);
+        
+        documents.forEach((doc, index) => {
+            const [id, tenTaiLieu, moTa, loaiTaiLieu, tieuChuan, phienBan, trangThai] = doc;
+            
+            const row = `
+                <tr data-id="${id}">
+                    <td>${id}</td>
+                    <td>${tenTaiLieu}</td>
+                    <td>${moTa}</td>
+                    <td>${loaiTaiLieu}</td>
+                    <td>${tieuChuan}</td>
+                    <td>${phienBan}</td>
+                    <td>${trangThai}</td>
+                    <td>
+                        <button onclick="editDocument('${id}')" class="btn-edit">Sửa</button>
+                        <button onclick="deleteDocument('${id}')" class="btn-delete">Xóa</button>
+                    </td>
+                </tr>
+            `;
+            
+            documentTable.insertAdjacentHTML('beforeend', row);
+        });
     } catch (error) {
-        showNotification('Lỗi khi tải dữ liệu: ' + error.message, 'error');
+        console.error('Lỗi tải tài liệu:', error);
+        alert('Không thể tải danh sách tài liệu.');
     }
 }
 
-// Hàm render bảng tài liệu
-function renderDocumentTable() {
-    const tbody = document.getElementById('documentTableBody');
-    tbody.innerHTML = '';
-
-    documents.forEach(doc => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${doc.id}</td>
-            <td>${doc.ten_tai_lieu}</td>
-            <td>${doc.mo_ta}</td>
-            <td>${formatLoaiTaiLieu(doc.loai_tai_lieu)}</td>
-            <td>${formatTieuChuan(doc.tieu_chuan)}</td>
-            <td>${doc.phien_ban_hien_tai}</td>
-            <td>
-                <span class="status-badge ${doc.trang_thai}">
-                    ${formatTrangThai(doc.trang_thai)}
-                </span>
-            </td>
-            <td>
-                <div class="action-buttons">
-                    <button class="btn-edit" onclick="showEditModal('${doc.id}')">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn-delete" onclick="confirmDelete('${doc.id}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    ${doc.file_dinh_kem ? `
-                        <button class="btn-download" onclick="downloadFile('${doc.id}')">
-                            <i class="fas fa-download"></i>
-                        </button>
-                    ` : ''}
-                </div>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-// Hàm format các giá trị enum
-function formatLoaiTaiLieu(loai) {
-    const map = {
-        'vanban': 'Văn bản',
-        'huongdan': 'Hướng dẫn',
-        'baocao': 'Báo cáo'
-    };
-    return map[loai] || loai;
-}
-
-function formatTieuChuan(tieuChuan) {
-    const map = {
-        'iso': 'ISO',
-        'haccp': 'HACCP',
-        'gmp': 'GMP'
-    };
-    return map[tieuChuan] || tieuChuan;
-}
-
-function formatTrangThai(trangThai) {
-    const map = {
-        'hieuluc': 'Hiệu lực',
-        'hethieuluc': 'Hết hiệu lực'
-    };
-    return map[trangThai] || trangThai;
-}
-
-// Các hàm xử lý modal
-function showModal() {
-    document.getElementById('documentModal').style.display = 'block';
-}
-
-function closeModal() {
-    document.getElementById('documentModal').style.display = 'none';
-    resetForm();
-}
-
-function showAddModal() {
-    currentDocumentId = null;
+// Open Add/Edit Modal
+function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Thêm Tài Liệu Mới';
-    showModal();
+    documentForm.reset();
+    documentModal.style.display = 'block';
 }
 
-function showEditModal(id) {
-    currentDocumentId = id;
-    document.getElementById('modalTitle').textContent = 'Sửa Tài Liệu';
-    const doc = documents.find(d => d.id === id);
-    if (doc) {
-        document.getElementById('tenTaiLieu').value = doc.ten_tai_lieu;
-        document.getElementById('moTa').value = doc.mo_ta;
-        document.getElementById('loaiTaiLieu').value = doc.loai_tai_lieu;
-        document.getElementById('tieuChuan').value = doc.tieu_chuan;
-        document.getElementById('phienBan').value = doc.phien_ban_hien_tai;
-        document.getElementById('trangThai').value = doc.trang_thai;
-    }
-    showModal();
-}
-
-// Reset form
-function resetForm() {
-    document.getElementById('documentForm').reset();
-    currentDocumentId = null;
-}
-
-// Hàm tạo ID mới
-function generateId() {
-    return 'DOC' + Date.now().toString().slice(-6);
-}
-
-// Hàm xử lý form submit
-async function handleFormSubmit(e) {
-    e.preventDefault();
-
+// Edit Document
+async function editDocument(id) {
     try {
-        const formData = {
-            ten_tai_lieu: document.getElementById('tenTaiLieu').value,
-            mo_ta: document.getElementById('moTa').value,
-            loai_tai_lieu: document.getElementById('loaiTaiLieu').value,
-            tieu_chuan: document.getElementById('tieuChuan').value,
-            phien_ban_hien_tai: document.getElementById('phienBan').value,
-            trang_thai: document.getElementById('trangThai').value,
-            ngay_cap_nhat: new Date().toISOString(),
-            nguoi_cap_nhat: 'user@example.com' // Sau này sẽ lấy từ thông tin đăng nhập
-        };
-
-        const fileInput = document.getElementById('fileDinhKem');
-        if (fileInput.files.length > 0) {
-            formData.file_dinh_kem = fileInput.files[0].name;
-            // Xử lý upload file (sau này sẽ thêm)
+        const response = await fetch(`${BASE_URL}!A:G?key=${API_KEY}`);
+        const data = await response.json();
+        
+        const document = data.values.find(doc => doc[0] === id);
+        
+        if (document) {
+            document.forEach((value, index) => {
+                const fields = ['documentId', 'tenTaiLieu', 'moTa', 'loaiTaiLieu', 'tieuChuan', 'phienBan', 'trangThai'];
+                document.getElementById(fields[index]).value = value;
+            });
+            
+            document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Tài Liệu';
+            documentModal.style.display = 'block';
         }
+    } catch (error) {
+        console.error('Lỗi tải chi tiết tài liệu:', error);
+        alert('Không thể tải thông tin tài liệu.');
+    }
+}
 
-        if (currentDocumentId) {
-            // Cập nhật tài liệu
-            await updateDocument(currentDocumentId, formData);
-            showNotification('Cập nhật tài liệu thành công!', 'success');
-        } else {
-            // Thêm tài liệu mới
-            formData.id = generateId();
-            formData.ngay_tao = new Date().toISOString();
-            formData.nguoi_tao = 'user@example.com'; // Sau này sẽ lấy từ thông tin đăng nhập
-            await addDocument(formData);
-            showNotification('Thêm tài liệu thành công!', 'success');
-        }
-
+// Save Document
+async function saveDocument(event) {
+    event.preventDefault();
+    
+    const id = document.getElementById('documentId').value || generateId();
+    const tenTaiLieu = document.getElementById('tenTaiLieu').value;
+    const moTa = document.getElementById('moTa').value;
+    const loaiTaiLieu = document.getElementById('loaiTaiLieu').value;
+    const tieuChuan = document.getElementById('tieuChuan').value;
+    const phienBan = document.getElementById('phienBan').value;
+    const trangThai = document.getElementById('trangThai').value;
+    
+    const documentData = [
+        id, tenTaiLieu, moTa, loaiTaiLieu, 
+        tieuChuan, phienBan, trangThai
+    ];
+    
+    try {
+        // Note: This is a simplified example. In a real-world scenario, 
+        // you'd need to use Google Sheets API with proper authentication
+        const response = await fetch(
+            `https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/exec`, 
+            {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    action: id ? 'update' : 'add',
+                    sheetName: SHEET_NAME,
+                    data: documentData
+                })
+            }
+        );
+        
+        loadDocuments();
         closeModal();
-        loadDocuments(); // Tải lại dữ liệu
     } catch (error) {
-        showNotification('Có lỗi xảy ra: ' + error.message, 'error');
+        console.error('Lỗi lưu tài liệu:', error);
+        alert('Không thể lưu tài liệu.');
     }
 }
 
-// Hàm thêm tài liệu mới
-async function addDocument(document) {
-    try {
-        await sheetsService.addDocument(document);
-        showNotification('Thêm tài liệu thành công!', 'success');
-    } catch (error) {
-        showNotification('Lỗi khi thêm tài liệu: ' + error.message, 'error');
-        throw error;
-    }
-}
-
-// Hàm cập nhật tài liệu
-async function updateDocument(id, document) {
-    try {
-        await sheetsService.updateDocument(id, document);
-        showNotification('Cập nhật tài liệu thành công!', 'success');
-    } catch (error) {
-        showNotification('Lỗi khi cập nhật tài liệu: ' + error.message, 'error');
-        throw error;
-    }
-}
-
-// Hàm xóa tài liệu
+// Delete Document
 async function deleteDocument(id) {
+    if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) return;
+    
     try {
-        await sheetsService.deleteDocument(id);
-        showNotification('Xóa tài liệu thành công!', 'success');
+        // Note: This is a simplified example. In a real-world scenario, 
+        // you'd need to use Google Sheets API with proper authentication
+        const response = await fetch(
+            `https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/exec`, 
+            {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify({
+                    action: 'delete',
+                    sheetName: SHEET_NAME,
+                    id: id
+                })
+            }
+        );
+        
         loadDocuments();
     } catch (error) {
-        showNotification('Lỗi khi xóa tài liệu: ' + error.message, 'error');
-        throw error;
+        console.error('Lỗi xóa tài liệu:', error);
+        alert('Không thể xóa tài liệu.');
     }
 }
 
-// Hàm xác nhận xóa
-function confirmDelete(id) {
-    if (confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) {
-        deleteDocument(id);
-    }
+// Utility Functions
+function closeModal() {
+    documentModal.style.display = 'none';
 }
 
-// Hàm download file
-function downloadFile(id) {
-    const doc = documents.find(d => d.id === id);
-    if (doc && doc.file_dinh_kem) {
-        // Giả lập download file
-        alert('Tính năng download file sẽ được phát triển sau');
-    }
+function generateId() {
+    return 'DOC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 }
 
-// Hàm hiển thị thông báo
-function showNotification(message, type = 'info') {
-    // Tạo element thông báo
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-
-    // Thêm vào body
-    document.body.appendChild(notification);
-
-    // Tự động xóa sau 3 giây
-    setTimeout(() => {
-        notification.remove();
-    }, 3000);
-}
-
-// Hàm validate form
-function validateForm() {
-    // Thêm logic validate form sau này
-    return true;
-}
+// Expose functions to global scope for inline event handlers
+window.editDocument = editDocument;
+window.deleteDocument = deleteDocument;
+window.closeModal = closeModal;
