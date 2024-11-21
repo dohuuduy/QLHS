@@ -3,26 +3,30 @@ const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
 const SHEET_NAME = 'TAI_LIEU';
 
 // Sử dụng Google Apps Script Web App để giao tiếp
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxamYXv5nQ4lXDpG0soPB7u8kgl5ZoWFFX8PE9pp1AXzCC33saQL9uyfJgmGdx361Jp/exec'; // Bạn sẽ thay thế URL thực
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbziL2hxxx-xxxxxxx/exec'; // Bạn sẽ thay thế URL thực
 
-// Khởi tạo các phần tử DOM
-const documentTable = document.getElementById('documentTableBody');
-const documentModal = document.getElementById('documentModal');
-const btnAddNew = document.getElementById('btnAddNew');
-const closeModalBtn = document.querySelector('.close');
-const documentForm = document.getElementById('documentForm');
+// Khởi tạo DataTable
+let documentDataTable;
 
 // Sự kiện khi trang được tải
-document.addEventListener('DOMContentLoaded', loadDocuments);
+document.addEventListener('DOMContentLoaded', function() {
+    // Khởi tạo modal Bootstrap
+    const documentModal = new bootstrap.Modal(document.getElementById('documentModal'));
 
-// Sự kiện nút Thêm mới
-btnAddNew.addEventListener('click', openAddModal);
+    // Nút thêm mới
+    document.getElementById('btnAddNew').addEventListener('click', function() {
+        openAddModal(documentModal);
+    });
 
-// Sự kiện đóng modal
-closeModalBtn.addEventListener('click', closeModal);
+    // Submit form
+    document.getElementById('documentForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        saveDocument(documentModal);
+    });
 
-// Sự kiện submit form
-documentForm.addEventListener('submit', saveDocument);
+    // Load danh sách tài liệu
+    loadDocuments();
+});
 
 // Hàm load danh sách tài liệu từ Google Sheet
 async function loadDocuments() {
@@ -30,8 +34,14 @@ async function loadDocuments() {
         const response = await fetch(`${WEB_APP_URL}?action=get&sheetName=${SHEET_NAME}`);
         const data = await response.json();
 
+        // Hủy DataTable cũ nếu tồn tại
+        if (documentDataTable) {
+            documentDataTable.destroy();
+        }
+
         // Xóa dữ liệu cũ
-        documentTable.innerHTML = '';
+        const documentTableBody = document.getElementById('documentTableBody');
+        documentTableBody.innerHTML = '';
 
         // Render dữ liệu mới
         data.forEach(doc => {
@@ -39,30 +49,128 @@ async function loadDocuments() {
                 <tr data-id="${doc.id}">
                     <td>${doc.id}</td>
                     <td>${doc.ten_tai_lieu}</td>
-                    <td>${doc.mo_ta}</td>
-                    <td>${doc.loai_tai_lieu}</td>
-                    <td>${doc.tieu_chuan}</td>
+                    <td>${doc.mo_ta || ''}</td>
+                    <td>${formatLoaiTaiLieu(doc.loai_tai_lieu)}</td>
+                    <td>${formatTieuChuan(doc.tieu_chuan)}</td>
                     <td>${doc.phien_ban_hien_tai}</td>
-                    <td>${doc.trang_thai}</td>
+                    <td>${formatTrangThai(doc.trang_thai)}</td>
                     <td>
-                        <button onclick="editDocument('${doc.id}')" class="btn-edit">Sửa</button>
-                        <button onclick="deleteDocument('${doc.id}')" class="btn-delete">Xóa</button>
+                        <div class="btn-group" role="group">
+                            <button onclick="viewDocument('${doc.id}')" class="btn btn-sm btn-info btn-action">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="editDocument('${doc.id}')" class="btn btn-sm btn-warning btn-action">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteDocument('${doc.id}')" class="btn btn-sm btn-danger btn-action">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
-            documentTable.insertAdjacentHTML('beforeend', row);
+            documentTableBody.insertAdjacentHTML('beforeend', row);
         });
+
+        // Khởi tạo DataTable
+        documentDataTable = $('#documentTable').DataTable({
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/vi.json'
+            },
+            responsive: true,
+            order: [[0, 'desc']]
+        });
+
     } catch (error) {
+        showAlert('Lỗi', 'Không thể tải danh sách tài liệu', 'danger');
         console.error('Lỗi tải danh sách tài liệu:', error);
-        alert('Không thể tải danh sách tài liệu');
     }
 }
 
 // Mở modal thêm mới
-function openAddModal() {
-    document.getElementById('modalTitle').textContent = 'Thêm Tài Liệu Mới';
-    documentForm.reset();
-    documentModal.style.display = 'block';
+function openAddModal(modal) {
+    document.getElementById('modalTitle').innerHTML = '<i class="fas fa-file-medical me-2"></i>Thêm Tài Liệu Mới';
+    document.getElementById('documentForm').reset();
+    document.getElementById('documentId').value = '';
+    modal.show();
+}
+
+// Hàm xem chi tiết tài liệu
+async function viewDocument(id) {
+    try {
+        const response = await fetch(`${WEB_APP_URL}?action=getById&sheetName=${SHEET_NAME}&id=${id}`);
+        const doc = await response.json();
+
+        const modalContent = `
+            <div class="modal fade" id="chiTietModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Chi Tiết Tài Liệu</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-bordered">
+                                <tr>
+                                    <th>Mã Tài Liệu</th>
+                                    <td>${doc.id}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tên Tài Liệu</th>
+                                    <td>${doc.ten_tai_lieu}</td>
+                                </tr>
+                                <tr>
+                                    <th>Mô Tả</th>
+                                    <td>${doc.mo_ta || 'Không có mô tả'}</td>
+                                </tr>
+                                <tr>
+                                    <th>Loại Tài Liệu</th>
+                                    <td>${formatLoaiTaiLieu(doc.loai_tai_lieu)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Tiêu Chuẩn</th>
+                                    <td>${formatTieuChuan(doc.tieu_chuan)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Phiên Bản</th>
+                                    <td>${doc.phien_ban_hien_tai}</td>
+                                </tr>
+                                <tr>
+                                    <th>Trạng Thái</th>
+                                    <td>${formatTrangThai(doc.trang_thai)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Người Tạo</th>
+                                    <td>${doc.nguoi_tao}</td>
+                                </tr>
+                                <tr>
+                                    <th>Ngày Tạo</th>
+                                    <td>${formatNgay(doc.ngay_tao)}</td>
+                                </tr>
+                                <tr>
+                                    <th>Người Cập Nhật</th>
+                                    <td>${doc.nguoi_cap_nhat}</td>
+                                </tr>
+                                <tr>
+                                    <th>Ngày Cập Nhật</th>
+                                    <td>${formatNgay(doc.ngay_cap_nhat)}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Thêm modal vào body và hiển thị
+        document.body.insertAdjacentHTML('beforeend', modalContent);
+        const chiTietModal = new bootstrap.Modal(document.getElementById('chiTietModal'));
+        chiTietModal.show();
+
+    } catch (error) {
+        showAlert('Lỗi', 'Không thể tải chi tiết tài liệu', 'danger');
+        console.error('Lỗi tải chi tiết tài liệu:', error);
+    }
 }
 
 // Hàm chỉnh sửa tài liệu
@@ -74,24 +182,26 @@ async function editDocument(id) {
         // Điền dữ liệu vào form
         document.getElementById('documentId').value = doc.id;
         document.getElementById('tenTaiLieu').value = doc.ten_tai_lieu;
-        document.getElementById('moTa').value = doc.mo_ta;
+        document.getElementById('moTa').value = doc.mo_ta || '';
         document.getElementById('loaiTaiLieu').value = doc.loai_tai_lieu;
         document.getElementById('tieuChuan').value = doc.tieu_chuan;
         document.getElementById('phienBan').value = doc.phien_ban_hien_tai;
         document.getElementById('trangThai').value = doc.trang_thai;
 
-        document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Tài Liệu';
-        documentModal.style.display = 'block';
+        // Thay đổi tiêu đề modal
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Chỉnh Sửa Tài Liệu';
+
+        // Hiển thị modal
+        const modal = new bootstrap.Modal(document.getElementById('documentModal'));
+        modal.show();
     } catch (error) {
+        showAlert('Lỗi', 'Không thể tải thông tin tài liệu', 'danger');
         console.error('Lỗi tải chi tiết tài liệu:', error);
-        alert('Không thể tải thông tin tài liệu');
     }
 }
 
 // Lưu tài liệu
-async function saveDocument(event) {
-    event.preventDefault();
-
+async function saveDocument(modal) {
     const documentData = {
         id: document.getElementById('documentId').value || generateId(),
         ten_tai_lieu: document.getElementById('tenTaiLieu').value,
@@ -100,14 +210,14 @@ async function saveDocument(event) {
         tieu_chuan: document.getElementById('tieuChuan').value,
         phien_ban_hien_tai: document.getElementById('phienBan').value,
         trang_thai: document.getElementById('trangThai').value,
-        nguoi_tao: 'Người dùng hiện tại', // Bạn có thể thay đổi
+        nguoi_tao: 'Người dùng hiện tại', 
         ngay_tao: new Date().toISOString(),
-        nguoi_cap_nhat: 'Người dùng hiện tại', // Bạn có thể thay đổi
+        nguoi_cap_nhat: 'Người dùng hiện tại', 
         ngay_cap_nhat: new Date().toISOString()
     };
 
     try {
-        const response = await fetch(WEB_APP_URL, {
+        await fetch(WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors',
             body: JSON.stringify({
@@ -117,17 +227,18 @@ async function saveDocument(event) {
             })
         });
 
+        showAlert('Thành Công', 'Tài liệu đã được lưu', 'success');
+        modal.hide();
         loadDocuments();
-        closeModal();
     } catch (error) {
+        showAlert('Lỗi', 'Không thể lưu tài liệu', 'danger');
         console.error('Lỗi lưu tài liệu:', error);
-        alert('Không thể lưu tài liệu');
     }
 }
 
 // Xóa tài liệu
 async function deleteDocument(id) {
-    if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) return;
+    if (!confirm('Bạn chắc chắn muốn xóa tài liệu này?')) return;
 
     try {
         await fetch(WEB_APP_URL, {
@@ -140,24 +251,59 @@ async function deleteDocument(id) {
             })
         });
 
+        showAlert('Thành Công', 'Tài liệu đã được xóa', 'success');
         loadDocuments();
     } catch (error) {
+        showAlert('Lỗi', 'Không thể xóa tài liệu', 'danger');
         console.error('Lỗi xóa tài liệu:', error);
-        alert('Không thể xóa tài liệu');
     }
 }
 
-// Đóng modal
-function closeModal() {
-    documentModal.style.display = 'none';
-}
-
-// Sinh ID ngẫu nhiên
+// Hàm sinh ID ngẫu nhiên
 function generateId() {
-    return 'DOC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    return 'TL_' + Math.random().toString(36).substr(2, 9).toUpperCase();
 }
 
-// Expose functions to global scope
-window.editDocument = editDocument;
-window.deleteDocument = deleteDocument;
-window.closeModal = closeModal;
+// Hàm hiển thị thông báo
+function showAlert(title, message, type) {
+    const alertContainer = document.createElement('div');
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            <strong>${title}:</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    document.querySelector('.container-fluid').prepend(alertContainer);
+}
+
+// Các hàm format
+function formatLoaiTaiLieu(loai) {
+    const loaiMap = {
+        'vanban': 'Văn Bản',
+        'huongdan': 'Hướng Dẫn',
+        'baocao': 'Báo Cáo'
+    };
+    return loaiMap[loai] || loai;
+}
+
+function formatTieuChuan(tieu_chuan) {
+    const tieuChuanMap = {
+        'iso': 'ISO',
+        'haccp': 'HACCP', 
+        'gmp': 'GMP'
+    };
+    return tieuChuanMap[tieu_chuan] || tieu_chuan;
+}
+
+function formatTrangThai(trang_thai) {
+    const trangThaiMap = {
+        'hieuluc': 'Hiệu Lực',
+        'hethieuluc': 'Hết Hiệu Lực'
+    };
+    return trangThaiMap[trang_thai] || trang_thai;
+}
+
+function formatNgay(ngay) {
+    if (!ngay) return 'Chưa xác định';
+    return new Date(ngay).toLocaleString('vi-VN');
+}
