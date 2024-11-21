@@ -3,106 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Tài Liệu</title>
-    <link rel="stylesheet" href="tailieu_style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Hệ Thống Quản Lý Tài Liệu</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f4f6f9;
+        }
+        .container-fluid {
+            padding-top: 20px;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            margin-top: 20px;
+        }
+        .btn-action {
+            margin-right: 5px;
+        }
+        .modal-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+        }
+        .form-label {
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Hệ Thống Quản Lý Tài Liệu</h1>
-            <button id="btnAddNew" class="btn-primary">
-                <i class="fas fa-plus"></i> Thêm Tài Liệu Mới
-            </button>
-        </header>
-
-        <main>
-            <!-- Bảng hiển thị danh sách tài liệu -->
-            <div class="table-container">
-                <table id="documentTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Tên Tài Liệu</th>
-                            <th>Mô Tả</th>
-                            <th>Loại Tài Liệu</th>
-                            <th>Tiêu Chuẩn</th>
-                            <th>Phiên Bản</th>
-                            <th>Trạng Thái</th>
-                            <th>Thao Tác</th>
-                        </tr>
-                    </thead>
-                    <tbody id="documentTableBody">
-                        <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
-                    </tbody>
-                </table>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-file-alt me-2"></i>Quản Lý Tài Liệu
+                        </h3>
+                        <button id="btnAddNew" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Thêm Tài Liệu Mới
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="documentTable" class="table table-striped table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tên Tài Liệu</th>
+                                        <th>Mô Tả</th>
+                                        <th>Loại Tài Liệu</th>
+                                        <th>Tiêu Chuẩn</th>
+                                        <th>Phiên Bản</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="documentTableBody">
+                                    <!-- Dữ liệu sẽ được load động -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
 
-            <!-- Form thêm/sửa tài liệu -->
-            <div id="documentModal" class="modal">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h2 id="modalTitle">Thêm Tài Liệu Mới</h2>
+    <!-- Modal Thêm/Sửa Tài Liệu -->
+    <div class="modal fade" id="documentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-file-medical me-2"></i>Thêm Tài Liệu Mới
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
                     <form id="documentForm">
                         <input type="hidden" id="documentId">
                         
-                        <div class="form-group">
-                            <label for="tenTaiLieu">Tên Tài Liệu:</label>
-                            <input type="text" id="tenTaiLieu" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="tenTaiLieu" class="form-label">Tên Tài Liệu</label>
+                                <input type="text" class="form-control" id="tenTaiLieu" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="loaiTaiLieu" class="form-label">Loại Tài Liệu</label>
+                                <select class="form-select" id="loaiTaiLieu" required>
+                                    <option value="">Chọn Loại Tài Liệu</option>
+                                    <option value="vanban">Văn Bản</option>
+                                    <option value="huongdan">Hướng Dẫn</option>
+                                    <option value="baocao">Báo Cáo</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="moTa">Mô Tả:</label>
-                            <textarea id="moTa" rows="3"></textarea>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="moTa" class="form-label">Mô Tả</label>
+                                <textarea class="form-control" id="moTa" rows="3"></textarea>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="loaiTaiLieu">Loại Tài Liệu:</label>
-                            <select id="loaiTaiLieu" required>
-                                <option value="">Chọn loại tài liệu</option>
-                                <option value="vanban">Văn bản</option>
-                                <option value="huongdan">Hướng dẫn</option>
-                                <option value="baocao">Báo cáo</option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="tieuChuan" class="form-label">Tiêu Chuẩn</label>
+                                <select class="form-select" id="tieuChuan" required>
+                                    <option value="">Chọn Tiêu Chuẩn</option>
+                                    <option value="iso">ISO</option>
+                                    <option value="haccp">HACCP</option>
+                                    <option value="gmp">GMP</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="phienBan" class="form-label">Phiên Bản</label>
+                                <input type="text" class="form-control" id="phienBan" required>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="trangThai" class="form-label">Trạng Thái</label>
+                                <select class="form-select" id="trangThai" required>
+                                    <option value="hieuluc">Hiệu Lực</option>
+                                    <option value="hethieuluc">Hết Hiệu Lực</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="tieuChuan">Tiêu Chuẩn:</label>
-                            <select id="tieuChuan" required>
-                                <option value="">Chọn tiêu chuẩn</option>
-                                <option value="iso">ISO</option>
-                                <option value="haccp">HACCP</option>
-                                <option value="gmp">GMP</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="phienBan">Phiên Bản:</label>
-                            <input type="text" id="phienBan" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="trangThai">Trạng Thái:</label>
-                            <select id="trangThai" required>
-                                <option value="hieuluc">Hiệu lực</option>
-                                <option value="hethieuluc">Hết hiệu lực</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="fileDinhKem">File Đính Kèm:</label>
-                            <input type="file" id="fileDinhKem">
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-primary">Lưu</button>
-                            <button type="button" class="btn-secondary" onclick="closeModal()">Hủy</button>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="fileDinhKem" class="form-label">File Đính Kèm</label>
+                                <input type="file" class="form-control" id="fileDinhKem">
+                            </div>
                         </div>
                     </form>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Hủy
+                    </button>
+                    <button type="submit" form="documentForm" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Lưu Tài Liệu
+                    </button>
+                </div>
             </div>
-        </main>
+        </div>
     </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
     <script src="tailieu_script.js"></script>
 </body>
 </html>
