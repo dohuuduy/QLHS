@@ -1,169 +1,163 @@
-// Configuration and Initialization
+// Cấu hình kết nối Google Sheet
 const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
 const SHEET_NAME = 'TAI_LIEU';
-const API_KEY = 'ce0cef083062eefdbe4e95478d4f88f71a92cfa2'; // Replace with your actual API key
-const BASE_URL = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}`;
 
-// DOM Elements
+// Sử dụng Google Apps Script Web App để giao tiếp
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxamYXv5nQ4lXDpG0soPB7u8kgl5ZoWFFX8PE9pp1AXzCC33saQL9uyfJgmGdx361Jp/exec'; // Bạn sẽ thay thế URL thực
+
+// Khởi tạo các phần tử DOM
 const documentTable = document.getElementById('documentTableBody');
 const documentModal = document.getElementById('documentModal');
 const btnAddNew = document.getElementById('btnAddNew');
 const closeModalBtn = document.querySelector('.close');
 const documentForm = document.getElementById('documentForm');
 
-// Event Listeners
+// Sự kiện khi trang được tải
 document.addEventListener('DOMContentLoaded', loadDocuments);
+
+// Sự kiện nút Thêm mới
 btnAddNew.addEventListener('click', openAddModal);
+
+// Sự kiện đóng modal
 closeModalBtn.addEventListener('click', closeModal);
+
+// Sự kiện submit form
 documentForm.addEventListener('submit', saveDocument);
 
-// Load Documents from Google Sheets
+// Hàm load danh sách tài liệu từ Google Sheet
 async function loadDocuments() {
     try {
-        const response = await fetch(`${BASE_URL}!A:G?key=${API_KEY}`);
+        const response = await fetch(`${WEB_APP_URL}?action=get&sheetName=${SHEET_NAME}`);
         const data = await response.json();
-        
-        // Clear existing table rows
+
+        // Xóa dữ liệu cũ
         documentTable.innerHTML = '';
-        
-        // Skip header row
-        const documents = data.values.slice(1);
-        
-        documents.forEach((doc, index) => {
-            const [id, tenTaiLieu, moTa, loaiTaiLieu, tieuChuan, phienBan, trangThai] = doc;
-            
+
+        // Render dữ liệu mới
+        data.forEach(doc => {
             const row = `
-                <tr data-id="${id}">
-                    <td>${id}</td>
-                    <td>${tenTaiLieu}</td>
-                    <td>${moTa}</td>
-                    <td>${loaiTaiLieu}</td>
-                    <td>${tieuChuan}</td>
-                    <td>${phienBan}</td>
-                    <td>${trangThai}</td>
+                <tr data-id="${doc.id}">
+                    <td>${doc.id}</td>
+                    <td>${doc.ten_tai_lieu}</td>
+                    <td>${doc.mo_ta}</td>
+                    <td>${doc.loai_tai_lieu}</td>
+                    <td>${doc.tieu_chuan}</td>
+                    <td>${doc.phien_ban_hien_tai}</td>
+                    <td>${doc.trang_thai}</td>
                     <td>
-                        <button onclick="editDocument('${id}')" class="btn-edit">Sửa</button>
-                        <button onclick="deleteDocument('${id}')" class="btn-delete">Xóa</button>
+                        <button onclick="editDocument('${doc.id}')" class="btn-edit">Sửa</button>
+                        <button onclick="deleteDocument('${doc.id}')" class="btn-delete">Xóa</button>
                     </td>
                 </tr>
             `;
-            
             documentTable.insertAdjacentHTML('beforeend', row);
         });
     } catch (error) {
-        console.error('Lỗi tải tài liệu:', error);
-        alert('Không thể tải danh sách tài liệu.');
+        console.error('Lỗi tải danh sách tài liệu:', error);
+        alert('Không thể tải danh sách tài liệu');
     }
 }
 
-// Open Add/Edit Modal
+// Mở modal thêm mới
 function openAddModal() {
     document.getElementById('modalTitle').textContent = 'Thêm Tài Liệu Mới';
     documentForm.reset();
     documentModal.style.display = 'block';
 }
 
-// Edit Document
+// Hàm chỉnh sửa tài liệu
 async function editDocument(id) {
     try {
-        const response = await fetch(`${BASE_URL}!A:G?key=${API_KEY}`);
-        const data = await response.json();
-        
-        const document = data.values.find(doc => doc[0] === id);
-        
-        if (document) {
-            document.forEach((value, index) => {
-                const fields = ['documentId', 'tenTaiLieu', 'moTa', 'loaiTaiLieu', 'tieuChuan', 'phienBan', 'trangThai'];
-                document.getElementById(fields[index]).value = value;
-            });
-            
-            document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Tài Liệu';
-            documentModal.style.display = 'block';
-        }
+        const response = await fetch(`${WEB_APP_URL}?action=getById&sheetName=${SHEET_NAME}&id=${id}`);
+        const doc = await response.json();
+
+        // Điền dữ liệu vào form
+        document.getElementById('documentId').value = doc.id;
+        document.getElementById('tenTaiLieu').value = doc.ten_tai_lieu;
+        document.getElementById('moTa').value = doc.mo_ta;
+        document.getElementById('loaiTaiLieu').value = doc.loai_tai_lieu;
+        document.getElementById('tieuChuan').value = doc.tieu_chuan;
+        document.getElementById('phienBan').value = doc.phien_ban_hien_tai;
+        document.getElementById('trangThai').value = doc.trang_thai;
+
+        document.getElementById('modalTitle').textContent = 'Chỉnh Sửa Tài Liệu';
+        documentModal.style.display = 'block';
     } catch (error) {
         console.error('Lỗi tải chi tiết tài liệu:', error);
-        alert('Không thể tải thông tin tài liệu.');
+        alert('Không thể tải thông tin tài liệu');
     }
 }
 
-// Save Document
+// Lưu tài liệu
 async function saveDocument(event) {
     event.preventDefault();
-    
-    const id = document.getElementById('documentId').value || generateId();
-    const tenTaiLieu = document.getElementById('tenTaiLieu').value;
-    const moTa = document.getElementById('moTa').value;
-    const loaiTaiLieu = document.getElementById('loaiTaiLieu').value;
-    const tieuChuan = document.getElementById('tieuChuan').value;
-    const phienBan = document.getElementById('phienBan').value;
-    const trangThai = document.getElementById('trangThai').value;
-    
-    const documentData = [
-        id, tenTaiLieu, moTa, loaiTaiLieu, 
-        tieuChuan, phienBan, trangThai
-    ];
-    
+
+    const documentData = {
+        id: document.getElementById('documentId').value || generateId(),
+        ten_tai_lieu: document.getElementById('tenTaiLieu').value,
+        mo_ta: document.getElementById('moTa').value,
+        loai_tai_lieu: document.getElementById('loaiTaiLieu').value,
+        tieu_chuan: document.getElementById('tieuChuan').value,
+        phien_ban_hien_tai: document.getElementById('phienBan').value,
+        trang_thai: document.getElementById('trangThai').value,
+        nguoi_tao: 'Người dùng hiện tại', // Bạn có thể thay đổi
+        ngay_tao: new Date().toISOString(),
+        nguoi_cap_nhat: 'Người dùng hiện tại', // Bạn có thể thay đổi
+        ngay_cap_nhat: new Date().toISOString()
+    };
+
     try {
-        // Note: This is a simplified example. In a real-world scenario, 
-        // you'd need to use Google Sheets API with proper authentication
-        const response = await fetch(
-            `https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/exec`, 
-            {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    action: id ? 'update' : 'add',
-                    sheetName: SHEET_NAME,
-                    data: documentData
-                })
-            }
-        );
-        
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+                action: documentData.id ? 'update' : 'add',
+                sheetName: SHEET_NAME,
+                data: documentData
+            })
+        });
+
         loadDocuments();
         closeModal();
     } catch (error) {
         console.error('Lỗi lưu tài liệu:', error);
-        alert('Không thể lưu tài liệu.');
+        alert('Không thể lưu tài liệu');
     }
 }
 
-// Delete Document
+// Xóa tài liệu
 async function deleteDocument(id) {
     if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) return;
-    
+
     try {
-        // Note: This is a simplified example. In a real-world scenario, 
-        // you'd need to use Google Sheets API with proper authentication
-        const response = await fetch(
-            `https://script.google.com/macros/s/YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL/exec`, 
-            {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({
-                    action: 'delete',
-                    sheetName: SHEET_NAME,
-                    id: id
-                })
-            }
-        );
-        
+        await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: JSON.stringify({
+                action: 'delete',
+                sheetName: SHEET_NAME,
+                id: id
+            })
+        });
+
         loadDocuments();
     } catch (error) {
         console.error('Lỗi xóa tài liệu:', error);
-        alert('Không thể xóa tài liệu.');
+        alert('Không thể xóa tài liệu');
     }
 }
 
-// Utility Functions
+// Đóng modal
 function closeModal() {
     documentModal.style.display = 'none';
 }
 
+// Sinh ID ngẫu nhiên
 function generateId() {
     return 'DOC-' + Math.random().toString(36).substr(2, 9).toUpperCase();
 }
 
-// Expose functions to global scope for inline event handlers
+// Expose functions to global scope
 window.editDocument = editDocument;
 window.deleteDocument = deleteDocument;
 window.closeModal = closeModal;
