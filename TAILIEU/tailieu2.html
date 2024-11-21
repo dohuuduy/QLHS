@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tài liệu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4e73df;
+            --secondary-color: #858796;
+        }
+
+        body {
+            background-color: #f8f9fc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1rem 1.5rem;
+        }
+
+        .table {
+            vertical-align: middle;
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 115, 223, 0.4);
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 0.7rem 1rem;
+            border: 1px solid #e3e6f0;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+
+        .btn-action {
+            border-radius: 50px;
+            padding: 0.4rem 1rem;
+            font-size: 0.875rem;
+            margin: 0 0.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-edit {
+            background-color: #ffc107;
+            border: none;
+            color: white;
+        }
+
+        .btn-delete {
+            background-color: #e74a3b;
+            border: none;
+            color: white;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .status-badge {
+            padding: 0.5em 1em;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: #1cc88a;
+            color: white;
+        }
+
+        .status-inactive {
+            background-color: #e74a3b;
+            color: white;
+        }
+
+        .table-responsive {
+            border-radius: 15px;
+        }
+
+        #documentTable_wrapper .row:first-child {
+            margin-bottom: 1rem;
+        }
+
+        .dataTables_filter input {
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #e3e6f0;
+        }
+
+        .document-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            border: 2px dashed #e3e6f0;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--primary-color);
+        }
+
+        .file-upload-wrapper input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-text {
+            text-align: center;
+            color: var(--secondary-color);
+        }
+
+        .file-upload-icon {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid p-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Quản lý tài liệu</h4>
+            <button type="button" class="btn btn-add text-white" data-bs-toggle="modal" data-bs-target="#documentModal">
+                <i class="fas fa-plus me-2"></i>Thêm tài liệu mới
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="documentTable" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên tài liệu</th>
+                            <th>Mô tả</th>
+                            <th>Loại tài liệu</th>
+                            <th>Tiêu chuẩn</th>
+                            <th>Phiên bản</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal form -->
+<div class="modal fade" id="documentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Thêm tài liệu mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="documentForm">
+                    <input type="hidden" id="documentId">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tên tài liệu</label>
+                            <input type="text" class="form-control" id="ten_tai_lieu" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Loại tài liệu</label>
+                            <select class="form-select" id="loai_tai_lieu" required>
+                                <option value="">Chọn loại tài liệu</option>
+                                <option value="Quy trình">Quy trình</option>
+                                <option value="Hướng dẫn">Hướng dẫn</option>
+                                <option value="Biểu mẫu">Biểu mẫu</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả</label>
+                        <textarea class="form-control" id="mo_ta" rows="3"></textarea>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tiêu chuẩn</label>
+                            <input type="text" class="form-control" id="tieu_chuan">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phiên bản hiện tại</label>
+                            <input type="text" class="form-control" id="phien_ban_hien_tai">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-select" id="trang_thai">
+                                <option value="Hoạt động">Hoạt động</option>
+                                <option value="Tạm ngưng">Tạm ngưng</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">File đính kèm</label>
+                            <div class="file-upload-wrapper">
+                                <input type="file" class="form-control" id="file_dinh_kem">
+                                <div class="file-upload-text">
+                                    <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+                                    <div>Kéo thả file hoặc click để tải lên</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" id="saveDocument">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading spinner -->
+<div class="loading">
+    <div class="spinner-border text-light" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+
+<script>
+const SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL';
+let isEditing = false;
+
+// Khởi tạo DataTable
+const table = $('#documentTable').DataTable({
+    language: {
+        url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+    },
+    responsive: true,
+    columnDefs: [
+        {
+            targets: -1,
+            data: null,
+            render: function (data, type, row) {
+                return `
+                    <button class="btn btn-action btn-edit" data-id="${row[0]}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-action btn-delete" data-id="${row[0]}">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+            }
+        },
+        {
+            targets: 6,
+            render: function (data) {
+                return `<span class="status-badge ${data === 'Hoạt động' ? 'status-active' : 'status-inactive'}">${data}</span>`;
+            }
+        }
+    ]
+});
+
+// Load dữ liệu
+function loadDocuments() {
+    showLoading();
+    fetch(SCRIPT_URL + '?action=read')
+        .then(response => response.json())
+        .then(data => {
+            table.clear();
+            data.forEach(doc => {
+                table.row.add([
+                    doc.id,
+                    `<div class="document-title">${doc.ten_tai_lieu}</div>`,
+                    doc.mo_ta,
+                    doc.loai_tai_lieu,
+                    doc.tieu_chuan,
+                    doc.phien_ban_hien_tai,
+                    doc.trang_thai
+                ]);
+            });
+            table.draw();
+            hideLoading();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoading();
+            showErrorMessage('Không thể tải dữ liệu');
+        });
+}
+
+// Xử lý sự kiện nút Lưu
+$('#saveDocument').click(function() {
+    if (!validateForm()) return;
+
+    const formData = {
+        id: $('#documentId').val(),
+        ten_tai_lieu: $('#ten_tai_lieu').val(),
+        mo_ta: $('#mo_ta').val(),
+        loai_tai_lieu: $('#loai_tai_lieu').val(),
+        tieu_chuan: $('#tieu_chuan').val(),
+        phien_ban_hien_tai: $('#phien_ban_hien_tai').val(),
+        trang_thai: $('#trang_thai').val()
+    };
+
+    const action = isEditing ? 'update' : 'create';
+    showLoading();
+
+    fetch(SCRIPT_URL + `?action=${action}`, {
+        method: 'POST',
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            $('#documentModal').modal('hide');
+            loadDocuments();
+            resetForm();
+            showSuccessMessage(isEditing ? 'Cập nhật thành công!' : 'Thêm mới thành công!');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        hideLoading();
+        showErrorMessage('Có lỗi xảy ra');
+    });
+});
+
+// Validate form
+function validateForm() {
+    const requiredFields = ['ten_tai_lieu', 'loai_tai_lieu'];
+    let isValid = true;
+
+    requiredFields.forEach(field => {
+        const value = $(`#${field}`).val();
+        if (!value) {
+            $(`#${field}`).addClass('is-invalid');
+            isValid = false;
+        } else {
+            $(`#${field}`).removeClass('is-invalid');
+        }
+    });
+
+    if (!isValid) {
+        showErrorMessage('Vui lòng điền đầy đủ thông tin bắt buộc');
+    }
+
+    return isValid;
+}
+
+// Xử lý sự kiện nút Sửa
+$(document).on('click', '.btn-edit', function() {
+    const id = $(this).data('id');
+    isEditing = true;
+    showLoading();
+
+    fetch(SCRIPT_URL + `?action=read&id=${id}`)
+        .then(response => response.json())
+        .then(data => {
+            const doc = data[0];
+            $('#documentId').val(doc.id);
+            $('#ten_tai_lieu').val(doc.ten_tai_lieu);
+            $('#mo_ta').val(doc.mo_ta);
+            $('#loai_tai_lieu').val(doc.loai_tai_lieu);
+            $('#tieu_chuan').val(doc.tieu_chuan);
+            $('#phien_ban_hien_tai').val(doc.phien_ban_hien_tai);
+            $('#trang_thai').val(doc.trang_thai);
+
+            $('#modalTitle').text('Sửa tài liệu');
+            $('#documentModal').modal('show');
+            hideLoading();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            hideLoading();
+            showErrorMessage('Không thể tải dữ liệu');
+        });
+});
+
+// Xử lý sự kiện nút Xóa
+$(document).on('click', '.btn-delete', function() {
+    const id = $(this).data('id');
+    
+    Swal.fire({
+        title: 'Xác nhận xóa?',
+        text: "Bạn không thể hoàn tác sau khi xóa!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Đồng ý',
+        cancelButtonText: 'Hủy'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            showLoading();
+            fetch(SCRIPT_URL + `?action=delete&id=${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        loadDocuments();
+                        showSuccessMessage('Xóa thành công!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    hideLoading();
+                    showErrorMessage('Có lỗi xảy ra');
+                });
+        }
+    });
+});
+
+// Hiển thị thông báo thành công
+function showSuccessMessage(message) {
+    Swal.fire({
+        icon: 'success',
+        title: 'Thành công!',
+        text: message,
+        timer: 1500,
+        showConfirmButton: false
+    });
+}
+
+// Hiển thị thông báo lỗi
+function showErrorMessage(message) {
+    Swal.fire({
+        icon: 'error',
+        title: 'Lỗi!',
+        text: message
+    });
+}
+
+// Hiển thị loading
+function showLoading() {
+    $('.loading').css('display', 'flex');
+}
+
+// Ẩn loading
+function hideLoading() {
+    $('.loading').css('display', 'none');
+}
+
+// Reset form
+function resetForm() {
+    $('#documentForm')[0].reset();
+    $('#documentId').val('');
+    $('#modalTitle').text('Thêm tài liệu mới');
+    isEditing = false;
+    $('.form-control').removeClass('is-invalid');
+}
+
+// File upload preview
+$('#file_dinh_kem').on('change', function() {
+    const fileName = $(this).val().split('\\').pop();
+    if (fileName) {
+        $('.file-upload-text').html(`
+            <i class="fas fa-file-alt file-upload-icon"></i>
+            <div>${fileName}</div>
+        `);
+    } else {
+        $('.file-upload-text').html(`
+            <i class="fas fa-cloud-upload-alt file-upload-icon"></i>
+            <div>Kéo thả file hoặc click để tải lên</div>
+        `);
+    }
+});
+
+// Load initial data
+loadDocuments();
+</script>
+
+</body>
+</html>
