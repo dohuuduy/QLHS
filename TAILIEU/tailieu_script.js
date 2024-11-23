@@ -29,28 +29,32 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Hàm load danh sách tài liệu từ Google Sheet
+// Thay đổi hàm loadDocuments
 async function loadDocuments() {
     try {
-        console.log('Full URL:', `${WEB_APP_URL}?action=get&sheetName=${SHEET_NAME}`);
+        const url = `${WEB_APP_URL}?action=get&sheetName=${SHEET_NAME}`;
+        console.log('Loading documents from:', url);
         
-        const response = await fetch(`${WEB_APP_URL}?action=get&sheetName=${SHEET_NAME}`, {
+        const response = await fetch(url, {
             method: 'GET',
+            mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             }
         });
 
-        console.log('Response Status:', response.status);
-        
-        // In ra toàn bộ nội dung phản hồi
-        const responseText = await response.text();
-        console.log('Raw Response:', responseText);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        // Thử parse JSON
-        const data = JSON.parse(responseText);
-        console.log('Parsed Data:', data);
+        const data = await response.json();
+        console.log('Received data:', data);
 
-        // Phần code còn lại giữ nguyên
+        if (data.status === 'error') {
+            throw new Error(data.message);
+        }
+
+        // Xóa DataTable cũ nếu tồn tại
         if (documentDataTable) {
             documentDataTable.destroy();
         }
@@ -58,15 +62,19 @@ async function loadDocuments() {
         const documentTableBody = document.getElementById('documentTableBody');
         documentTableBody.innerHTML = '';
 
-        data.forEach(doc => {
+        if (!Array.isArray(data.data)) {
+            throw new Error('Dữ liệu không hợp lệ');
+        }
+
+        data.data.forEach(doc => {
             const row = `
                 <tr data-id="${doc.id}">
                     <td>${doc.id}</td>
-                    <td>${doc.ten_tai_lieu}</td>
+                    <td>${doc.ten_tai_lieu || ''}</td>
                     <td>${doc.mo_ta || ''}</td>
                     <td>${formatLoaiTaiLieu(doc.loai_tai_lieu)}</td>
                     <td>${formatTieuChuan(doc.tieu_chuan)}</td>
-                    <td>${doc.phien_ban_hien_tai}</td>
+                    <td>${doc.phien_ban_hien_tai || ''}</td>
                     <td>${formatTrangThai(doc.trang_thai)}</td>
                     <td>
                         <div class="btn-group" role="group">
@@ -86,6 +94,7 @@ async function loadDocuments() {
             documentTableBody.insertAdjacentHTML('beforeend', row);
         });
 
+        // Khởi tạo DataTable
         documentDataTable = $('#documentTable').DataTable({
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/vi.json'
@@ -95,8 +104,57 @@ async function loadDocuments() {
         });
 
     } catch (error) {
-        console.error('Chi tiết lỗi:', error);
-        showAlert('Lỗi', 'Không thể tải danh sách tài liệu. Chi tiết lỗi đã được ghi trong console.', 'danger');
+        console.error('Error loading documents:', error);
+        showAlert('Lỗi', `Không thể tải danh sách tài liệu: ${error.message}`, 'danger');
+    }
+}
+
+// Cập nhật hàm saveDocument
+async function saveDocument(modal) {
+    const documentData = {
+        id: document.getElementById('documentId').value || generateId(),
+        ten_tai_lieu: document.getElementById('tenTaiLieu').value,
+        mo_ta: document.getElementById('moTa').value,
+        loai_tai_lieu: document.getElementById('loaiTaiLieu').value,
+        tieu_chuan: document.getElementById('tieuChuan').value,
+        phien_ban_hien_tai: document.getElementById('phienBan').value,
+        trang_thai: document.getElementById('trangThai').value,
+        nguoi_tao: 'Người dùng hiện tại',
+        ngay_tao: new Date().toISOString(),
+        nguoi_cap_nhat: 'Người dùng hiện tại',
+        ngay_cap_nhat: new Date().toISOString()
+    };
+
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: documentData.id ? 'update' : 'add',
+                sheetName: SHEET_NAME,
+                data: documentData
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            showAlert('Thành Công', 'Tài liệu đã được lưu', 'success');
+            modal.hide();
+            await loadDocuments();
+        } else {
+            throw new Error(result.message || 'Không thể lưu tài liệu');
+        }
+    } catch (error) {
+        console.error('Save error:', error);
+        showAlert('Lỗi', `Không thể lưu tài liệu: ${error.message}`, 'danger');
     }
 }
 
