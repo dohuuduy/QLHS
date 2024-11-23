@@ -180,3 +180,141 @@ function showAlert(title, message, type) {
     // Implement your alert UI here
     alert(`${title}: ${message}`);
 }
+
+// Khai báo biến toàn cục
+let documentModal;
+let documentDataTable;
+
+// Hàm khởi tạo khi trang được load
+document.addEventListener('DOMContentLoaded', function() {
+    // Khởi tạo modal
+    documentModal = new bootstrap.Modal(document.getElementById('documentModal'));
+    
+    // Khởi tạo sự kiện cho nút thêm mới
+    document.getElementById('btnAddNew').addEventListener('click', function() {
+        resetForm();
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-file-medical me-2"></i>Thêm Tài Liệu Mới';
+        documentModal.show();
+    });
+
+    // Khởi tạo sự kiện submit form
+    document.getElementById('documentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveDocument(documentModal);
+    });
+
+    // Load dữ liệu ban đầu
+    loadDocuments();
+});
+
+// Hàm reset form
+function resetForm() {
+    document.getElementById('documentId').value = '';
+    document.getElementById('tenTaiLieu').value = '';
+    document.getElementById('moTa').value = '';
+    document.getElementById('loaiTaiLieu').value = '';
+    document.getElementById('tieuChuan').value = '';
+    document.getElementById('phienBan').value = '';
+    document.getElementById('trangThai').value = 'hieuluc';
+    document.getElementById('fileDinhKem').value = '';
+}
+
+// Hàm xem chi tiết tài liệu
+async function viewDocument(id) {
+    try {
+        const response = await callAPI('GET', 'getById', { id: id });
+        if (response.status === 'success' && response.data) {
+            // Hiển thị dữ liệu vào form
+            fillFormData(response.data);
+            // Disable tất cả các trường
+            Array.from(document.getElementById('documentForm').elements).forEach(element => {
+                element.disabled = true;
+            });
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-eye me-2"></i>Xem Chi Tiết Tài Liệu';
+            documentModal.show();
+        } else {
+            showAlert('Lỗi', 'Không tìm thấy tài liệu', 'error');
+        }
+    } catch (error) {
+        console.error('Error viewing document:', error);
+        showAlert('Lỗi', `Không thể xem tài liệu: ${error.message}`, 'error');
+    }
+}
+// Hàm sửa tài liệu
+async function editDocument(id) {
+    try {
+        const response = await callAPI('GET', 'getById', { id: id });
+        if (response.status === 'success' && response.data) {
+            // Hiển thị dữ liệu vào form
+            fillFormData(response.data);
+            // Enable tất cả các trường
+            Array.from(document.getElementById('documentForm').elements).forEach(element => {
+                element.disabled = false;
+            });
+            document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit me-2"></i>Sửa Tài Liệu';
+            documentModal.show();
+        } else {
+            showAlert('Lỗi', 'Không tìm thấy tài liệu', 'error');
+        }
+    } catch (error) {
+        console.error('Error editing document:', error);
+        showAlert('Lỗi', `Không thể sửa tài liệu: ${error.message}`, 'error');
+    }
+}
+
+// Hàm xóa tài liệu
+async function deleteDocument(id) {
+    if (confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) {
+        try {
+            const response = await callAPI('POST', 'delete', { id: id });
+            if (response.status === 'success') {
+                showAlert('Thành công', 'Đã xóa tài liệu', 'success');
+                await loadDocuments();
+            } else {
+                showAlert('Lỗi', response.message || 'Không thể xóa tài liệu', 'error');
+            }
+        } catch (error) {
+            console.error('Error deleting document:', error);
+            showAlert('Lỗi', `Không thể xóa tài liệu: ${error.message}`, 'error');
+        }
+    }
+}
+
+// Hàm điền dữ liệu vào form
+function fillFormData(data) {
+    document.getElementById('documentId').value = data.id || '';
+    document.getElementById('tenTaiLieu').value = data.ten_tai_lieu || '';
+    document.getElementById('moTa').value = data.mo_ta || '';
+    document.getElementById('loaiTaiLieu').value = data.loai_tai_lieu || '';
+    document.getElementById('tieuChuan').value = data.tieu_chuan || '';
+    document.getElementById('phienBan').value = data.phien_ban_hien_tai || '';
+    document.getElementById('trangThai').value = data.trang_thai || 'hieuluc';
+}
+
+// Hàm hiển thị thông báo đẹp hơn
+function showAlert(title, message, type) {
+    // Tạo element alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.role = 'alert';
+    alertDiv.innerHTML = `
+        <strong>${title}</strong> ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Thêm vào đầu trang
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Tự động ẩn sau 5 giây
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+
+// Hàm format ngày giờ
+function formatDateTime(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleString('vi-VN');
+}
