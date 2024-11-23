@@ -3,7 +3,7 @@ const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
 const SHEET_NAME = 'TAI_LIEU';
 
 // Sử dụng Google Apps Script Web App để giao tiếp
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzaNIvk9yFmgzRBr8tn7OnJzgJG9zG7pHHSdv5-dpoBpMEn_0FuBWUmozdxA5j_UENh/exec'; // Bạn sẽ thay thế URL thực
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxeh8RcGlVSVQXai3QutU1a-6s5tV2ll-XCAyKSGY_xU5eGx5NZJsyr2DdaaPH9chIO/exec'; // Bạn sẽ thay thế URL thực
 
 // Khởi tạo DataTable
 let documentDataTable;
