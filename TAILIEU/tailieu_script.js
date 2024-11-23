@@ -1,7 +1,7 @@
 // Cấu hình kết nối Google Sheet
 const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
 const SHEET_NAME = 'TAI_LIEU';
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxeh8RcGlVSVQXai3QutU1a-6s5tV2ll-XCAyKSGY_xU5eGx5NZJsyr2DdaaPH9chIO/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzct0qocDJtqaktRxYjkeP_0L7BpzFNjD-s4U8maJP0qTsPX8FqISm1dnsNQuuL1RE_/exec';
 
 // Hàm gọi API với xử lý CORS
 async function callAPI(method, action, data = null) {
