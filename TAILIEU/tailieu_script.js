@@ -8,7 +8,15 @@ async function callAPI(method, action, data = null) {
     try {
         const url = new URL(WEB_APP_URL);
         
-        // Thêm parameters cho GET requests
+        const fetchOptions = {
+            method: method,
+            mode: 'cors', // Thay đổi từ no-cors sang cors
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+
+        // Xử lý GET request
         if (method === 'GET') {
             url.searchParams.append('action', action);
             url.searchParams.append('sheetName', SHEET_NAME);
@@ -19,15 +27,7 @@ async function callAPI(method, action, data = null) {
             }
         }
 
-        const fetchOptions = {
-            method: method,
-            mode: 'no-cors', // Quan trọng: Sử dụng no-cors
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        // Thêm body cho POST requests
+        // Xử lý POST request
         if (method === 'POST' && data) {
             fetchOptions.body = JSON.stringify({
                 action: action,
@@ -38,19 +38,10 @@ async function callAPI(method, action, data = null) {
 
         const response = await fetch(url, fetchOptions);
         
-        // Xử lý response dạng 'opaque' từ no-cors
-        if (response.type === 'opaque') {
-            // Trả về một promise giả lập response thành công
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve({
-                        status: 'success',
-                        message: 'Operation completed'
-                    });
-                }, 1000);
-            });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-
+        
         return await response.json();
     } catch (error) {
         console.error('API call error:', error);
@@ -58,31 +49,21 @@ async function callAPI(method, action, data = null) {
     }
 }
 
-// Cập nhật hàm loadDocuments
+// Hàm load documents
 async function loadDocuments() {
     try {
         const response = await callAPI('GET', 'get');
         
-        // Xử lý response và cập nhật UI
+        if (!response || response.status === 'error') {
+            throw new Error(response?.message || 'Failed to load documents');
+        }
+
         const documentTableBody = document.getElementById('documentTableBody');
         documentTableBody.innerHTML = '';
 
-        // Giả định dữ liệu mẫu nếu không nhận được response do no-cors
-        const sampleData = [
-            {
-                id: 'TL_001',
-                ten_tai_lieu: 'Loading...',
-                mo_ta: 'Loading...',
-                loai_tai_lieu: 'vanban',
-                tieu_chuan: 'iso',
-                phien_ban_hien_tai: '1.0',
-                trang_thai: 'hieuluc'
-            }
-        ];
-
-        const data = response.data || sampleData;
-
-        data.forEach(doc => {
+        const documents = response.data || [];
+        
+        documents.forEach(doc => {
             const row = `
                 <tr data-id="${doc.id}">
                     <td>${doc.id}</td>
@@ -110,12 +91,12 @@ async function loadDocuments() {
             documentTableBody.insertAdjacentHTML('beforeend', row);
         });
 
-        // Khởi tạo hoặc refresh DataTable
-        if (documentDataTable) {
-            documentDataTable.destroy();
+        // Khởi tạo DataTable
+        if ($.fn.DataTable.isDataTable('#documentTable')) {
+            $('#documentTable').DataTable().destroy();
         }
         
-        documentDataTable = $('#documentTable').DataTable({
+        $('#documentTable').DataTable({
             language: {
                 url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/vi.json'
             },
@@ -129,26 +110,30 @@ async function loadDocuments() {
     }
 }
 
-// Cập nhật hàm saveDocument
+// Hàm lưu document
 async function saveDocument(modal) {
-    const documentData = {
-        id: document.getElementById('documentId').value || generateId(),
-        ten_tai_lieu: document.getElementById('tenTaiLieu').value,
-        mo_ta: document.getElementById('moTa').value,
-        loai_tai_lieu: document.getElementById('loaiTaiLieu').value,
-        tieu_chuan: document.getElementById('tieuChuan').value,
-        phien_ban_hien_tai: document.getElementById('phienBan').value,
-        trang_thai: document.getElementById('trangThai').value,
-        nguoi_tao: 'Người dùng hiện tại',
-        ngay_tao: new Date().toISOString(),
-        nguoi_cap_nhat: 'Người dùng hiện tại',
-        ngay_cap_nhat: new Date().toISOString()
-    };
-
     try {
+        const documentData = {
+            id: document.getElementById('documentId').value || generateId(),
+            ten_tai_lieu: document.getElementById('tenTaiLieu').value,
+            mo_ta: document.getElementById('moTa').value,
+            loai_tai_lieu: document.getElementById('loaiTaiLieu').value,
+            tieu_chuan: document.getElementById('tieuChuan').value,
+            phien_ban_hien_tai: document.getElementById('phienBan').value,
+            trang_thai: document.getElementById('trangThai').value,
+            nguoi_tao: 'User',
+            ngay_tao: new Date().toISOString(),
+            nguoi_cap_nhat: 'User',
+            ngay_cap_nhat: new Date().toISOString()
+        };
+
         const action = documentData.id ? 'update' : 'add';
-        await callAPI('POST', action, documentData);
+        const response = await callAPI('POST', action, documentData);
         
+        if (response.status === 'error') {
+            throw new Error(response.message);
+        }
+
         showAlert('Thành Công', 'Tài liệu đã được lưu', 'success');
         modal.hide();
         await loadDocuments();
@@ -156,4 +141,42 @@ async function saveDocument(modal) {
         console.error('Save error:', error);
         showAlert('Lỗi', `Không thể lưu tài liệu: ${error.message}`, 'danger');
     }
+}
+
+// Hàm format dữ liệu
+function formatLoaiTaiLieu(loai) {
+    const map = {
+        'vanban': 'Văn Bản',
+        'huongdan': 'Hướng Dẫn',
+        'baocao': 'Báo Cáo'
+    };
+    return map[loai] || loai;
+}
+
+function formatTieuChuan(tieuChuan) {
+    const map = {
+        'iso': 'ISO',
+        'haccp': 'HACCP',
+        'gmp': 'GMP'
+    };
+    return map[tieuChuan] || tieuChuan;
+}
+
+function formatTrangThai(trangThai) {
+    const map = {
+        'hieuluc': 'Hiệu Lực',
+        'hethieuluc': 'Hết Hiệu Lực'
+    };
+    return map[trangThai] || trangThai;
+}
+
+// Hàm tạo ID mới
+function generateId() {
+    return 'TL_' + Date.now().toString().slice(-6);
+}
+
+// Hàm hiển thị thông báo
+function showAlert(title, message, type) {
+    // Implement your alert UI here
+    alert(`${title}: ${message}`);
 }
