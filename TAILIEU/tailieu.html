@@ -3,193 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Quản Lý Tài Liệu</title>
-    
+    <title>Danh Sách Tài Liệu</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background-color: #f4f6f9;
+            background-color: #f4f4f4;
         }
-        .container-fluid {
-            padding-top: 20px;
-        }
-        .card {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        .table-responsive {
-            margin-top: 20px;
-        }
-        .btn-action {
-            margin-right: 5px;
-        }
-        .modal-header {
-            background-color: #f8f9fa;
-            padding: 15px;
-        }
-        .form-label {
-            font-weight: 600;
+        .table-hover tbody tr:hover {
+            background-color: #f5f5f5;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0">
-                            <i class="fas fa-file-alt me-2"></i>Quản Lý Tài Liệu
-                        </h3>
-                        <button id="btnAddNew" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Thêm Tài Liệu Mới
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table id="documentTable" class="table table-striped table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Tên Tài Liệu</th>
-                                        <th>Mô Tả</th>
-                                        <th>Loại Tài Liệu</th>
-                                        <th>Tiêu Chuẩn</th>
-                                        <th>Phiên Bản</th>
-                                        <th>Trạng Thái</th>
-                                        <th>Thao Tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="documentTableBody">
-                                    <!-- Dữ liệu sẽ được load động -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-6 text-center">Danh Sách Tài Liệu</h1>
+        
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table id="tai-lieu-table" class="table table-striped table-hover w-full">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Tài Liệu</th>
+                        <th>Mô Tả</th>
+                        <th>Loại</th>
+                        <th>Tiêu Chuẩn</th>
+                        <th>Phiên Bản</th>
+                        <th>Trạng Thái</th>
+                        <th>Người Tạo</th>
+                        <th>Ngày Tạo</th>
+                    </tr>
+                </thead>
+                <tbody id="tai-lieu-body">
+                    <!-- Dữ liệu sẽ được load động -->
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Modal Thêm/Sửa Tài Liệu -->
-    <div class="modal fade" id="documentModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">
-                        <i class="fas fa-file-medical me-2"></i>Thêm Tài Liệu Mới
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="documentForm">
-                        <input type="hidden" id="documentId">
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="tenTaiLieu" class="form-label">Tên Tài Liệu</label>
-                                <input type="text" class="form-control" id="tenTaiLieu" required>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="loaiTaiLieu" class="form-label">Loại Tài Liệu</label>
-                                <select class="form-select" id="loaiTaiLieu" required>
-                                    <option value="">Chọn Loại Tài Liệu</option>
-                                    <option value="vanban">Văn Bản</option>
-                                    <option value="huongdan">Hướng Dẫn</option>
-                                    <option value="baocao">Báo Cáo</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label for="moTa" class="form-label">Mô Tả</label>
-                                <textarea class="form-control" id="moTa" rows="3"></textarea>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="tieuChuan" class="form-label">Tiêu Chuẩn</label>
-                                <select class="form-select" id="tieuChuan" required>
-                                    <option value="">Chọn Tiêu Chuẩn</option>
-                                    <option value="iso">ISO</option>
-                                    <option value="haccp">HACCP</option>
-                                    <option value="gmp">GMP</option>
-                                </select>
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="phienBan" class="form-label">Phiên Bản</label>
-                                <input type="text" class="form-control" id="phienBan" required>
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="trangThai" class="form-label">Trạng Thái</label>
-                                <select class="form-select" id="trangThai" required>
-                                    <option value="hieuluc">Hiệu Lực</option>
-                                    <option value="hethieuluc">Hết Hiệu Lực</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label for="fileDinhKem" class="form-label">File Đính Kèm</label>
-                                <input type="file" class="form-control" id="fileDinhKem">
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Hủy
-                    </button>
-                    <button type="submit" form="documentForm" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Lưu Tài Liệu
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap JS và dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    
-    <!-- DataTables JS -->
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
-
-    <script src="tailieu_script.js"></script>
     <script>
-// Khởi tạo tooltips
-var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
-});
+        const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
+        const API_KEY = 'ce0cef083062eefdbe4e95478d4f88f71a92cfa2'; // Thay bằng API key của bạn
 
-// Khởi tạo DataTable với ngôn ngữ tiếng Việt
-$(document).ready(function() {
-    documentDataTable = $('#documentTable').DataTable({
-        language: {
-            url: 'https://cdn.datatables.net/plug-ins/1.11.5/i18n/vi.json'
-        },
-        responsive: true,
-        order: [[0, 'desc']]
-    });
-});
-</script>
+        async function fetchTaiLieuData() {
+            try {
+                const response = await fetch(
+                    `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/Sheet1!A:J?key=${API_KEY}`
+                );
+                const data = await response.json();
+                
+                const tableBody = document.getElementById('tai-lieu-body');
+                const rows = data.values.slice(1); // Bỏ qua hàng tiêu đề
+
+                rows.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row[0] || ''}</td>
+                        <td>${row[1] || ''}</td>
+                        <td>${row[2] || ''}</td>
+                        <td>${row[3] || ''}</td>
+                        <td>${row[4] || ''}</td>
+                        <td>${row[5] || ''}</td>
+                        <td>${row[6] || ''}</td>
+                        <td>${row[7] || ''}</td>
+                        <td>${row[8] || ''}</td>
+                    `;
+                    tableBody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Lỗi tải dữ liệu:', error);
+            }
+        }
+
+        // Gọi hàm load dữ liệu khi trang web được tải
+        document.addEventListener('DOMContentLoaded', fetchTaiLieuData);
+    </script>
 </body>
 </html>
