@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://apis.google.com/js/api.js"></script>
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://apis.google.com https://www.googleapis.com 'unsafe-inline' 'unsafe-eval';">
     <style>
         .loading {
             display: none;
@@ -170,24 +171,39 @@
             }, 3000);
         }
 
-        function initClient() {
-            gapi.client.init({
-                apiKey: API_KEY,
-                clientId: CLIENT_ID,
-                discoveryDocs: DISCOVERY_DOCS,
-                scope: SCOPES
-            }).then(() => {
-                // Listen for sign-in state changes
-                gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-                // Handle initial sign-in state
-                updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-                // Handle click events
-                authorizeButton.onclick = handleAuthClick;
-                signoutButton.onclick = handleSignoutClick;
-            }).catch(error => {
-                showMessage(`Error initializing: ${error.message}`, true);
-            });
-        }
+       function initClient() {
+    // Kiểm tra xem gapi có tồn tại không
+    if (!window.gapi) {
+        console.error('Google API client library not loaded');
+        showMessage('Không thể tải Google API client library', true);
+        return;
+    }
+
+    // Thêm try-catch cho việc khởi tạo
+    try {
+        gapi.client.init({
+            apiKey: API_KEY,
+            clientId: CLIENT_ID,
+            discoveryDocs: DISCOVERY_DOCS,
+            scope: SCOPES
+        }).then(function() {
+            console.log('Google API client initialized successfully');
+            // Listen for sign-in state changes
+            gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+            // Handle initial sign-in state
+            updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+            
+            authorizeButton.onclick = handleAuthClick;
+            signoutButton.onclick = handleSignoutClick;
+        }).catch(function(error) {
+            console.error('Error initializing Google API client:', error);
+            showMessage('Lỗi khởi tạo Google API: ' + error.message, true);
+        });
+    } catch (error) {
+        console.error('Error in initClient:', error);
+        showMessage('Lỗi trong quá trình khởi tạo: ' + error.message, true);
+    }
+}
 
         function updateSigninStatus(isSignedIn) {
             if (isSignedIn) {
@@ -368,9 +384,23 @@
             }
         });
 
-        function loadGoogleAPI() {
-            gapi.load('client:auth2', initClient);
-        }
+// Sửa lại hàm loadGoogleAPI
+function loadGoogleAPI() {
+    const script = document.createElement('script');
+    script.src = 'https://apis.google.com/js/api.js';
+    script.onload = function() {
+        console.log('Google API script loaded');
+        gapi.load('client:auth2', function() {
+            console.log('Google API client loaded');
+            initClient();
+        });
+    };
+    script.onerror = function() {
+        console.error('Failed to load Google API script');
+        showMessage('Không thể tải Google API script', true);
+    };
+    document.body.appendChild(script);
+}
 
         document.addEventListener('DOMContentLoaded', loadGoogleAPI);
     </script>
