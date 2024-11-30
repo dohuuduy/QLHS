@@ -3,446 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý tài liệu</title>
-    
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary-color: #4e73df;
-            --secondary-color: #858796;
-            --success-color: #1cc88a;
-            --danger-color: #e74a3b;
-        }
-
-        body {
-            background-color: #f8f9fc;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .container {
-            padding: 2rem;
-            background-color: white;
-            border-radius: 0.35rem;
-            box-shadow: 0 0.15rem 1.75rem rgba(58, 59, 69, 0.15);
-            margin: 2rem auto;
-        }
-
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .table-title {
-            font-size: 1.25rem;
-            color: var(--secondary-color);
-            margin: 0;
-        }
-
-        .btn-add {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn-add:hover {
-            background-color: #2e59d9;
-            transform: translateY(-1px);
-        }
-
-        .btn-add i {
-            font-size: 0.875rem;
-        }
-
-        .table {
-            width: 100%;
-            margin-bottom: 1rem;
-            background-color: white;
-        }
-
-        .table th {
-            color: var(--secondary-color);
-            font-weight: 600;
-            border-bottom: 2px solid #e3e6f0;
-            padding: 1rem;
-        }
-
-        .table td {
-            padding: 1rem;
-            vertical-align: middle;
-            border-color: #e3e6f0;
-        }
-
-        .btn-action {
-            padding: 0.25rem 0.5rem;
-            border: none;
-            background: none;
-            color: var(--secondary-color);
-            transition: all 0.3s ease;
-        }
-
-        .btn-edit:hover {
-            color: var(--primary-color);
-        }
-
-        .btn-delete:hover {
-            color: var(--danger-color);
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background-color: rgba(28, 200, 138, 0.1);
-            color: var(--success-color);
-        }
-
-        .status-inactive {
-            background-color: rgba(231, 74, 59, 0.1);
-            color: var(--danger-color);
-        }
-
-        /* Search box styling */
-        .dataTables_filter input {
-            border-radius: 50px;
-            padding: 0.5rem 1rem;
-            border: 1px solid #e3e6f0;
-            margin-left: 0.5rem;
-        }
-
-        /* Dropdown "Show entries" */
-        .dataTables_length {
-            margin-bottom: 1rem;
-        }
-        
-        .dataTables_length select {
-            min-width: 80px;
-            border-radius: 50px;
-            padding: 0.5rem 2rem 0.5rem 1rem;
-            border: 1px solid #e3e6f0;
-            background-position: right 0.75rem center;
-        }
-
-        /* Pagination styling */
-        .dataTables_paginate {
-            margin-top: 1rem !important;
-            float: right;
-        }
-
-        .pagination {
-            margin: 0 !important;
-        }
-
-        .page-link {
-            padding: 0.5rem 0.75rem;
-            border-radius: 50% !important;
-            margin: 0 0.2rem;
-            border: none;
-            color: var(--secondary-color);
-            min-width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .page-link:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .page-item.active .page-link {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .page-item.disabled .page-link {
-            background-color: #f8f9fc;
-            border-color: #e3e6f0;
-        }
-
-        /* Table footer info */
-        .dataTables_info {
-            padding-top: 1rem;
-        }
-
-        #documentTable_wrapper .row:last-child {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 1rem;
-        }
-
-        /* Modal styles */
-        .modal-content {
-            border-radius: 0.5rem;
-            border: none;
-        }
-
-        .modal-header {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 0.5rem 0.5rem 0 0;
-        }
-
-        .modal-title {
-            font-weight: 600;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .form-label {
-            color: var(--secondary-color);
-            font-weight: 500;
-        }
-
-        .form-control {
-            border-radius: 0.35rem;
-            padding: 0.5rem 1rem;
-            border: 1px solid #e3e6f0;
-        }
-
-        .modal-footer {
-            border-top: none;
-            padding: 1rem 1.5rem 1.5rem;
-        }
-
-        .btn-modal {
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-weight: 500;
-        }
-
-        .btn-save {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-cancel {
-            background-color: #f8f9fc;
-            color: var(--secondary-color);
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 767px) {
-            .container {
-                padding: 1rem;
-                margin: 1rem;
-            }
-
-            .table-header {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .dataTables_wrapper .row:first-child,
-            .dataTables_wrapper .row:last-child {
-                flex-direction: column;
-            }
-
-            .dataTables_wrapper .row:first-child > div,
-            .dataTables_wrapper .row:last-child > div {
-                width: 100%;
-                margin-bottom: 0.5rem;
-                text-align: center;
-            }
-
-            .dataTables_paginate {
-                float: none;
-                display: flex;
-                justify-content: center;
-            }
-
-            .dataTables_info {
-                text-align: center;
-            }
-        }
-    </style>
+    <title>Quản Lý Tài Liệu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-    <div class="container">
-        <div class="table-header">
-            <h2 class="table-title">Danh sách tài liệu</h2>
-            <button class="btn btn-add" data-bs-toggle="modal" data-bs-target="#documentModal">
-                <i class="fas fa-plus"></i>
-                Thêm mới
-            </button>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-6 text-center">Quản Lý Tài Liệu</h1>
+        
+        <div class="mb-4">
+            <button id="them-tai-lieu-btn" class="btn btn-primary">Thêm Tài Liệu</button>
         </div>
 
-        <table id="documentTable" class="table table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Tên tài liệu</th>
-                    <th>Mô tả</th>
-                    <th>Ngày tạo</th>
-                    <th>Người tạo</th>
-                    <th>Thể loại</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Tài liệu hướng dẫn</td>
-                    <td>Mô tả chi tiết về quy trình làm việc</td>
-                    <td>20/11/2024</td>
-                    <td>Nguyễn Văn A</td>
-                    <td>Hướng dẫn</td>
-                    <td>Hoạt động</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Báo cáo quý 1</td>
-                    <td>Báo cáo kết quả kinh doanh Q1/2024</td>
-                    <td>20/11/2024</td>
-                    <td>Trần Thị B</td>
-                    <td>Báo cáo</td>
-                    <td>Hoạt động</td>
-                    <td></td>
-                </tr>
-                <!-- Thêm dữ liệu mẫu khác nếu cần -->
-            </tbody>
-        </table>
+        <div id="error-message" class="alert alert-danger" style="display:none;"></div>
+        
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table id="tai-lieu-table" class="table table-striped table-hover w-full">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên Tài Liệu</th>
+                        <th>Mô Tả</th>
+                        <th>Loại</th>
+                        <th>Tiêu Chuẩn</th>
+                        <th>Phiên Bản</th>
+                        <th>Trạng Thái</th>
+                        <th>Người Tạo</th>
+                        <th>Ngày Tạo</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="tai-lieu-body">
+                    <!-- Dữ liệu sẽ được load động -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="documentModal" tabindex="-1" aria-hidden="true">
+    <!-- Modal Thêm/Sửa Tài Liệu -->
+    <div class="modal fade" id="tai-lieu-modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Thêm tài liệu mới</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title">Thêm/Sửa Tài Liệu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="documentForm">
+                    <form id="tai-lieu-form">
+                        <input type="hidden" id="row-index">
                         <div class="mb-3">
-                            <label for="documentName" class="form-label">Tên tài liệu</label>
-                            <input type="text" class="form-control" id="documentName" required>
+                            <label class="form-label">Tên Tài Liệu</label>
+                            <input type="text" class="form-control" id="ten-tai-lieu" required>
                         </div>
                         <div class="mb-3">
-                            <label for="documentDescription" class="form-label">Mô tả</label>
-                            <textarea class="form-control" id="documentDescription" rows="3"></textarea>
+                            <label class="form-label">Mô Tả</label>
+                            <textarea class="form-control" id="mo-ta"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="documentCategory" class="form-label">Thể loại</label>
-                            <select class="form-control" id="documentCategory">
-                                <option>Hướng dẫn</option>
-                                <option>Báo cáo</option>
-                                <option>Tài liệu khác</option>
-                            </select>
+                            <label class="form-label">Loại Tài Liệu</label>
+                            <input type="text" class="form-control" id="loai-tai-lieu">
                         </div>
                         <div class="mb-3">
-                            <label for="documentStatus" class="form-label">Trạng thái</label>
-                            <select class="form-control" id="documentStatus">
-                                <option>Hoạt động</option>
-                                <option>Không hoạt động</option>
-                            </select>
+                            <label class="form-label">Tiêu Chuẩn</label>
+                            <input type="text" class="form-control" id="tieu-chuan">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phiên Bản</label>
+                            <input type="text" class="form-control" id="phien-ban">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Trạng Thái</label>
+                            <input type="text" class="form-control" id="trang-thai">
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-modal btn-cancel" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-modal btn-save">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="luu-tai-lieu-btn">Lưu</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Bootstrap Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- DataTables -->
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
-
     <script>
-        $(document).ready(function() {
-            // Khởi tạo DataTable
-            const table = $('#documentTable').DataTable({
-                language: {
-                    url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json',
-                    paginate: {
-                        previous: '<i class="fas fa-chevron-left"></i>',
-                        next: '<i class="fas fa-chevron-right"></i>'
-                    }
-                },
-                responsive: true,
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-                columnDefs: [
-                    {
-                        targets: -1,
-                        data: null,
-                        render: function (data, type, row) {
-                            return `
-                                <button class="btn btn-action btn-edit" data-id="${row[0]}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-action btn-delete" data-id="${row[0]}">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            `;
-                        }
-                    },
-                    {
-                        targets: 6,
-                        render: function (data) {
-                            return `<span class="status-badge ${data === 'Hoạt động' ? 'status-active' : 'status-inactive'}">${data}</span>`;
-                        }
-                    }
-                ]
-            });
+        const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
+        const API_KEY = 'AIzaSyAuBF_gEsHGlZMedj8wZDc_sk8tyU6MVRc';
+        let currentData = [];
 
-            // Xử lý sự kiện click nút Edit
-            $('#documentTable').on('click', '.btn-edit', function() {
-                const id = $(this).data('id');
-                $('#documentModal').modal('show');
-                // Thêm logic lấy và điền dữ liệu vào form
-            });
+        // Modal Bootstrap
+        const taiLieuModal = new bootstrap.Modal(document.getElementById('tai-lieu-modal'));
+        
+        // Các element
+        const tableBody = document.getElementById('tai-lieu-body');
+        const themTaiLieuBtn = document.getElementById('them-tai-lieu-btn');
+        const luuTaiLieuBtn = document.getElementById('luu-tai-lieu-btn');
+        const errorMessageEl = document.getElementById('error-message');
 
-            // Xử lý sự kiện click nút Delete
-            $('#documentTable').on('click', '.btn-delete', function() {
-                const id = $(this).data('id');
-                if(confirm('Bạn có chắc chắn muốn xóa tài liệu này?')) {
-                    // Thêm logic xóa dữ liệu
+        // Các input trong form
+        const rowIndexInput = document.getElementById('row-index');
+        const tenTaiLieuInput = document.getElementById('ten-tai-lieu');
+        const moTaInput = document.getElementById('mo-ta');
+        const loaiTaiLieuInput = document.getElementById('loai-tai-lieu');
+        const tieuChuanInput = document.getElementById('tieu-chuan');
+        const phienBanInput = document.getElementById('phien-ban');
+        const trangThaiInput = document.getElementById('trang-thai');
+
+        async function fetchTaiLieuData() {
+            try {
+                const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/TAI_LIEU!A:J?key=${API_KEY}`;
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+
+                const data = await response.json();
+                currentData = data.values.slice(1); // Bỏ qua hàng tiêu đề
+                renderTable();
+            } catch (error) {
+                showError(`Lỗi tải dữ liệu: ${error.message}`);
+            }
+        }
+
+        function renderTable() {
+            tableBody.innerHTML = '';
+            currentData.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row[0] || ''}</td>
+                    <td>${row[1] || ''}</td>
+                    <td>${row[2] || ''}</td>
+                    <td>${row[3] || ''}</td>
+                    <td>${row[4] || ''}</td>
+                    <td>${row[5] || ''}</td>
+                    <td>${row[6] || ''}</td>
+                    <td>${row[7] || ''}</td>
+                    <td>${row[8] || ''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-2 edit-btn" data-index="${index}">Sửa</button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-index="${index}">Xóa</button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
             });
 
-            // Xử lý sự kiện submit form
-            $('.btn-save').click(function() {
-                // Thêm logic lưu dữ liệu
-                $('#documentModal').modal('hide');
+            // Gắn sự kiện cho nút Sửa và Xóa
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', editTaiLieu);
             });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', deleteTaiLieu);
+            });
+        }
+
+        function showError(message) {
+            errorMessageEl.textContent = message;
+            errorMessageEl.style.display = 'block';
+        }
+
+        // Thêm Tài Liệu
+        themTaiLieuBtn.addEventListener('click', () => {
+            // Reset form
+            rowIndexInput.value = '';
+            tenTaiLieuInput.value = '';
+            moTaInput.value = '';
+            loaiTaiLieuInput.value = '';
+            tieuChuanInput.value = '';
+            phienBanInput.value = '';
+            trangThaiInput.value = '';
+
+            taiLieuModal.show();
         });
+
+        // Sửa Tài Liệu
+        function editTaiLieu(event) {
+            const index = event.target.dataset.index;
+            const row = currentData[index];
+
+            // Điền thông tin vào form
+            rowIndexInput.value = index;
+            tenTaiLieuInput.value = row[1] || '';
+            moTaInput.value = row[2] || '';
+            loaiTaiLieuInput.value = row[3] || '';
+            tieuChuanInput.value = row[4] || '';
+            phienBanInput.value = row[5] || '';
+            trangThaiInput.value = row[6] || '';
+
+            taiLieuModal.show();
+        }
+
+        // Xóa Tài Liệu
+        function deleteTaiLieu(event) {
+            const index = event.target.dataset.index;
+            if(confirm('Bạn có chắc muốn xóa tài liệu này?')) {
+                currentData.splice(index, 1);
+                renderTable();
+                // TODO: Implement actual deletion in Google Sheets
+                alert('Chức năng xóa trực tiếp trên Google Sheets sẽ được cập nhật sau');
+            }
+        }
+
+        // Lưu Tài Liệu
+        luuTaiLieuBtn.addEventListener('click', () => {
+            const index = rowIndexInput.value;
+            const newRow = [
+                index ? currentData[index][0] : (currentData.length + 1).toString(), // ID
+                tenTaiLieuInput.value,
+                moTaInput.value,
+                loaiTaiLieuInput.value,
+                tieuChuanInput.value,
+                phienBanInput.value,
+                trangThaiInput.value,
+                'Người Dùng', // Người tạo (tạm thời)
+                new Date().toLocaleDateString(), // Ngày tạo
+            ];
+
+            if (index) {
+                // Sửa
+                currentData[index] = newRow;
+            } else {
+                // Thêm mới
+                currentData.push(newRow);
+            }
+
+            renderTable();
+            taiLieuModal.hide();
+
+            // TODO: Implement actual update in Google Sheets
+            alert('Chức năng lưu trực tiếp trên Google Sheets sẽ được cập nhật sau');
+        });
+
+        // Khởi tạo
+        document.addEventListener('DOMContentLoaded', fetchTaiLieuData);
     </script>
 </body>
 </html>
