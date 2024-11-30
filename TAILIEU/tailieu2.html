@@ -402,7 +402,44 @@ function loadGoogleAPI() {
     document.body.appendChild(script);
 }
 
+function checkGAPIStatus() {
+    console.log('GAPI Status:', {
+        'window.gapi exists': !!window.gapi,
+        'gapi.client exists': !!(window.gapi && gapi.client),
+        'gapi.auth2 exists': !!(window.gapi && gapi.auth2),
+        'API Key configured': !!API_KEY,
+        'Client ID configured': !!CLIENT_ID
+    });
+}
+function initClientWithRetry(retryCount = 0) {
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 second
+
+    if (retryCount >= maxRetries) {
+        showMessage('Không thể kết nối với Google API sau nhiều lần thử', true);
+        return;
+    }
+
+    try {
+        initClient();
+    } catch (error) {
+        console.error(`Retry ${retryCount + 1} failed:`, error);
+        setTimeout(() => initClientWithRetry(retryCount + 1), retryDelay);
+    }
+}
+// Gọi hàm này sau khi load script
+document.addEventListener('DOMContentLoaded', function() {
+    loadGoogleAPI();
+    setTimeout(checkGAPIStatus, 2000); // Kiểm tra sau 2 giây
+});
+        
+
         document.addEventListener('DOMContentLoaded', loadGoogleAPI);
+        // Gọi hàm này sau khi load script
+document.addEventListener('DOMContentLoaded', function() {
+    loadGoogleAPI();
+    setTimeout(checkGAPIStatus, 2000); // Kiểm tra sau 2 giây
+});
     </script>
 </body>
 </html>
