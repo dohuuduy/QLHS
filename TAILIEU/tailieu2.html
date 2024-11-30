@@ -12,10 +12,11 @@
         <h1 class="text-3xl font-bold mb-6 text-center">Quản Lý Tài Liệu</h1>
         
         <div class="mb-4">
-            <button id="them-tai-lieu-btn" class="btn btn-primary">Thêm Tài Liệu</button>
+            <button id="them-tai-lieu-btn" class="btn btn-primary">Thêm Tài Liệu Mới</button>
         </div>
 
         <div id="error-message" class="alert alert-danger" style="display:none;"></div>
+        <div id="success-message" class="alert alert-success" style="display:none;"></div>
         
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <table id="tai-lieu-table" class="table table-striped table-hover w-full">
@@ -51,6 +52,7 @@
                 <div class="modal-body">
                     <form id="tai-lieu-form">
                         <input type="hidden" id="row-index">
+                        <input type="hidden" id="tai-lieu-id">
                         <div class="mb-3">
                             <label class="form-label">Tên Tài Liệu</label>
                             <input type="text" class="form-control" id="ten-tai-lieu" required>
@@ -90,6 +92,7 @@
     <script>
         const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
         const API_KEY = 'AIzaSyAuBF_gEsHGlZMedj8wZDc_sk8tyU6MVRc';
+        const SHEET_NAME = 'TAI_LIEU';
         let currentData = [];
 
         // Modal Bootstrap
@@ -100,9 +103,11 @@
         const themTaiLieuBtn = document.getElementById('them-tai-lieu-btn');
         const luuTaiLieuBtn = document.getElementById('luu-tai-lieu-btn');
         const errorMessageEl = document.getElementById('error-message');
+        const successMessageEl = document.getElementById('success-message');
 
         // Các input trong form
         const rowIndexInput = document.getElementById('row-index');
+        const taiLieuIdInput = document.getElementById('tai-lieu-id');
         const tenTaiLieuInput = document.getElementById('ten-tai-lieu');
         const moTaInput = document.getElementById('mo-ta');
         const loaiTaiLieuInput = document.getElementById('loai-tai-lieu');
@@ -110,9 +115,21 @@
         const phienBanInput = document.getElementById('phien-ban');
         const trangThaiInput = document.getElementById('trang-thai');
 
+        function showMessage(message, isError = false) {
+            if (isError) {
+                errorMessageEl.textContent = message;
+                errorMessageEl.style.display = 'block';
+                successMessageEl.style.display = 'none';
+            } else {
+                successMessageEl.textContent = message;
+                successMessageEl.style.display = 'block';
+                errorMessageEl.style.display = 'none';
+            }
+        }
+
         async function fetchTaiLieuData() {
             try {
-                const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/TAI_LIEU!A:J?key=${API_KEY}`;
+                const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A:J?key=${API_KEY}`;
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
@@ -123,7 +140,7 @@
                 currentData = data.values.slice(1); // Bỏ qua hàng tiêu đề
                 renderTable();
             } catch (error) {
-                showError(`Lỗi tải dữ liệu: ${error.message}`);
+                showMessage(`Lỗi tải dữ liệu: ${error.message}`, true);
             }
         }
 
@@ -159,15 +176,11 @@
             });
         }
 
-        function showError(message) {
-            errorMessageEl.textContent = message;
-            errorMessageEl.style.display = 'block';
-        }
-
         // Thêm Tài Liệu
         themTaiLieuBtn.addEventListener('click', () => {
             // Reset form
             rowIndexInput.value = '';
+            taiLieuIdInput.value = '';
             tenTaiLieuInput.value = '';
             moTaInput.value = '';
             loaiTaiLieuInput.value = '';
@@ -185,6 +198,7 @@
 
             // Điền thông tin vào form
             rowIndexInput.value = index;
+            taiLieuIdInput.value = row[0] || '';
             tenTaiLieuInput.value = row[1] || '';
             moTaInput.value = row[2] || '';
             loaiTaiLieuInput.value = row[3] || '';
@@ -196,21 +210,37 @@
         }
 
         // Xóa Tài Liệu
-        function deleteTaiLieu(event) {
+        async function deleteTaiLieu(event) {
             const index = event.target.dataset.index;
+            const taiLieuId = currentData[index][0];
+
             if(confirm('Bạn có chắc muốn xóa tài liệu này?')) {
-                currentData.splice(index, 1);
-                renderTable();
-                // TODO: Implement actual deletion in Google Sheets
-                alert('Chức năng xóa trực tiếp trên Google Sheets sẽ được cập nhật sau');
+                try {
+                    const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A${index + 2}:J${index + 2}?key=${API_KEY}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    // Xóa dòng khỏi mảng local
+                    currentData.splice(index, 1);
+                    renderTable();
+                    showMessage('Xóa tài liệu thành công!');
+                } catch (error) {
+                    showMessage(`Lỗi xóa tài liệu: ${error.message}`, true);
+                }
             }
         }
 
         // Lưu Tài Liệu
-        luuTaiLieuBtn.addEventListener('click', () => {
+        luuTaiLieuBtn.addEventListener('click', async () => {
             const index = rowIndexInput.value;
+            const isEditMode = index !== '';
+
             const newRow = [
-                index ? currentData[index][0] : (currentData.length + 1).toString(), // ID
+                isEditMode ? taiLieuIdInput.value : (currentData.length + 1).toString(),
                 tenTaiLieuInput.value,
                 moTaInput.value,
                 loaiTaiLieuInput.value,
@@ -221,19 +251,55 @@
                 new Date().toLocaleDateString(), // Ngày tạo
             ];
 
-            if (index) {
-                // Sửa
-                currentData[index] = newRow;
-            } else {
-                // Thêm mới
-                currentData.push(newRow);
+            try {
+                if (isEditMode) {
+                    // Sửa
+                    const response = await fetch(
+                        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A${parseInt(index) + 2}:J${parseInt(index) + 2}?key=${API_KEY}`,
+                        {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                values: [newRow]
+                            })
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    currentData[index] = newRow;
+                } else {
+                    // Thêm mới
+                    const response = await fetch(
+                        `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A${currentData.length + 2}:J${currentData.length + 2}?key=${API_KEY}`,
+                        {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                values: [newRow]
+                            })
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    currentData.push(newRow);
+                }
+
+                renderTable();
+                taiLieuModal.hide();
+                showMessage(`${isEditMode ? 'Sửa' : 'Thêm'} tài liệu thành công!`);
+            } catch (error) {
+                showMessage(`Lỗi ${isEditMode ? 'sửa' : 'thêm'} tài liệu: ${error.message}`, true);
             }
-
-            renderTable();
-            taiLieuModal.hide();
-
-            // TODO: Implement actual update in Google Sheets
-            alert('Chức năng lưu trực tiếp trên Google Sheets sẽ được cập nhật sau');
         });
 
         // Khởi tạo
