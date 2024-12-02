@@ -6,43 +6,74 @@
     <title>Quản Lý Tài Liệu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
-        <meta http-equiv="Content-Security-Policy" content="script-src 'self' https://apis.google.com https://www.googleapis.com 'unsafe-inline' 'unsafe-eval';">
-    <style>
-        .loading {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
-    </style>
 </head>
-<body>
-    <div class="loading" id="loading">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    </div>
-
+<body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8">
-        <h1 class="text-3xl font-bold mb-6 text-center">Quản Lý Tài Liệu</h1>
+        <h1 class="text-3xl font-bold mb-6 text-center">Quản Lý Danh Sách Tài Liệu</h1>
         
+        <div id="error-message" class="alert alert-danger" style="display:none;"></div>
+        
+        <!-- Nút Thêm Mới -->
         <div class="mb-4">
-            <button id="authorize-button" class="btn btn-success me-2" style="display: none;">Đăng nhập</button>
-            <button id="signout-button" class="btn btn-danger me-2" style="display: none;">Đăng xuất</button>
-            <button id="them-tai-lieu-btn" class="btn btn-primary" style="display: none;">Thêm Tài Liệu Mới</button>
+            <button id="them-moi-btn" class="btn btn-primary">
+                Thêm Tài Liệu Mới
+            </button>
         </div>
 
-        <div id="error-message" class="alert alert-danger" style="display:none;"></div>
-        <div id="success-message" class="alert alert-success" style="display:none;"></div>
-        
+        <!-- Modal Thêm/Sửa Tài Liệu -->
+        <div id="tai-lieu-modal" class="modal" tabindex="-1" style="display:none;">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 id="modal-title" class="modal-title">Thêm Tài Liệu Mới</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="tai-lieu-form">
+                            <input type="hidden" id="row-index" name="rowIndex">
+                            <div class="mb-3">
+                                <label for="ten-tai-lieu" class="form-label">Tên Tài Liệu</label>
+                                <input type="text" class="form-control" id="ten-tai-lieu" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mo-ta" class="form-label">Mô Tả</label>
+                                <textarea class="form-control" id="mo-ta"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="loai" class="form-label">Loại</label>
+                                <input type="text" class="form-control" id="loai">
+                            </div>
+                            <div class="mb-3">
+                                <label for="tieu-chuan" class="form-label">Tiêu Chuẩn</label>
+                                <input type="text" class="form-control" id="tieu-chuan">
+                            </div>
+                            <div class="mb-3">
+                                <label for="phien-ban" class="form-label">Phiên Bản</label>
+                                <input type="text" class="form-control" id="phien-ban">
+                            </div>
+                            <div class="mb-3">
+                                <label for="trang-thai" class="form-label">Trạng Thái</label>
+                                <select class="form-select" id="trang-thai">
+                                    <option value="Mới Tạo">Mới Tạo</option>
+                                    <option value="Đang Sử Dụng">Đang Sử Dụng</option>
+                                    <option value="Ngưng Sử Dụng">Ngưng Sử Dụng</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="nguoi-tao" class="form-label">Người Tạo</label>
+                                <input type="text" class="form-control" id="nguoi-tao">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="dong-modal">Đóng</button>
+                        <button type="button" class="btn btn-primary" id="luu-tai-lieu">Lưu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng Tài Liệu -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <table id="tai-lieu-table" class="table table-striped table-hover w-full">
                 <thead class="bg-gray-100">
@@ -60,386 +91,208 @@
                     </tr>
                 </thead>
                 <tbody id="tai-lieu-body">
+                    <!-- Dữ liệu sẽ được load động -->
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Modal Thêm/Sửa Tài Liệu -->
-    <div class="modal fade" id="tai-lieu-modal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Thêm/Sửa Tài Liệu</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="tai-lieu-form">
-                        <input type="hidden" id="row-index">
-                        <input type="hidden" id="tai-lieu-id">
-                        <div class="mb-3">
-                            <label class="form-label">Tên Tài Liệu</label>
-                            <input type="text" class="form-control" id="ten-tai-lieu" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Mô Tả</label>
-                            <textarea class="form-control" id="mo-ta"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Loại Tài Liệu</label>
-                            <input type="text" class="form-control" id="loai-tai-lieu">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tiêu Chuẩn</label>
-                            <input type="text" class="form-control" id="tieu-chuan">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phiên Bản</label>
-                            <input type="text" class="form-control" id="phien-ban">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Trạng Thái</label>
-                            <select class="form-control" id="trang-thai">
-                                <option value="Mới">Mới</option>
-                                <option value="Đang xử lý">Đang xử lý</option>
-                                <option value="Hoàn thành">Hoàn thành</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" id="luu-tai-lieu-btn">Lưu</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        // Thông tin xác thực Google API
-        const CLIENT_ID = '626931651727-fs8f1n9ijn6jqrn8k7qlmi9l84nhl74l.apps.googleusercontent.com';
-        const API_KEY = 'AIzaSyAuBF_gEsHGlZMedj8wZDc_sk8tyU6MVRc';
         const SHEET_ID = '1Be_ESe7P7hC42dzqKC6sP2M-IWb_A2x0gMpuhJ5T7rA';
+        const API_KEY = 'AIzaSyAuBF_gEsHGlZMedj8wZDc_sk8tyU6MVRc';
         const SHEET_NAME = 'TAI_LIEU';
-        
-        // Discovery docs và scope
-        const DISCOVERY_DOCS = ["https://sheets.googleapis.com/$discovery/rest?version=v4"];
-        const SCOPES = "https://www.googleapis.com/auth/spreadsheets";
 
-        let currentData = [];
-        const taiLieuModal = new bootstrap.Modal(document.getElementById('tai-lieu-modal'));
-        
-        // Elements
-        const authorizeButton = document.getElementById('authorize-button');
-        const signoutButton = document.getElementById('signout-button');
-        const themTaiLieuBtn = document.getElementById('them-tai-lieu-btn');
-        const tableBody = document.getElementById('tai-lieu-body');
-        const luuTaiLieuBtn = document.getElementById('luu-tai-lieu-btn');
-        const errorMessageEl = document.getElementById('error-message');
-        const successMessageEl = document.getElementById('success-message');
-        const loadingEl = document.getElementById('loading');
-
-        // Form inputs
-        const rowIndexInput = document.getElementById('row-index');
-        const taiLieuIdInput = document.getElementById('tai-lieu-id');
-        const tenTaiLieuInput = document.getElementById('ten-tai-lieu');
-        const moTaInput = document.getElementById('mo-ta');
-        const loaiTaiLieuInput = document.getElementById('loai-tai-lieu');
-        const tieuChuanInput = document.getElementById('tieu-chuan');
-        const phienBanInput = document.getElementById('phien-ban');
-        const trangThaiInput = document.getElementById('trang-thai');
-
-        function showLoading(show = true) {
-            loadingEl.style.display = show ? 'flex' : 'none';
-        }
-
-        function showMessage(message, isError = false) {
-            if (isError) {
-                errorMessageEl.textContent = message;
-                errorMessageEl.style.display = 'block';
-                successMessageEl.style.display = 'none';
-            } else {
-                successMessageEl.textContent = message;
-                successMessageEl.style.display = 'block';
-                errorMessageEl.style.display = 'none';
+        class TaiLieuManager {
+            constructor() {
+                this.initEventListeners();
             }
-            setTimeout(() => {
-                errorMessageEl.style.display = 'none';
-                successMessageEl.style.display = 'none';
-            }, 3000);
-        }
 
-       function initClient() {
-    // Kiểm tra xem gapi có tồn tại không
-    if (!window.gapi) {
-        console.error('Google API client library not loaded');
-        showMessage('Không thể tải Google API client library', true);
-        return;
-    }
-
-    // Thêm try-catch cho việc khởi tạo
-    try {
-        gapi.client.init({
-            apiKey: API_KEY,
-            clientId: CLIENT_ID,
-            discoveryDocs: DISCOVERY_DOCS,
-            scope: SCOPES
-        }).then(function() {
-            console.log('Google API client initialized successfully');
-            // Listen for sign-in state changes
-            gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
-            // Handle initial sign-in state
-            updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
-            
-            authorizeButton.onclick = handleAuthClick;
-            signoutButton.onclick = handleSignoutClick;
-        }).catch(function(error) {
-            console.error('Error initializing Google API client:', error);
-            showMessage('Lỗi khởi tạo Google API: ' + error.message, true);
-        });
-    } catch (error) {
-        console.error('Error in initClient:', error);
-        showMessage('Lỗi trong quá trình khởi tạo: ' + error.message, true);
-    }
-}
-
-        function updateSigninStatus(isSignedIn) {
-            if (isSignedIn) {
-                authorizeButton.style.display = 'none';
-                signoutButton.style.display = 'inline-block';
-                themTaiLieuBtn.style.display = 'inline-block';
-                fetchTaiLieuData();
-            } else {
-                authorizeButton.style.display = 'inline-block';
-                signoutButton.style.display = 'none';
-                themTaiLieuBtn.style.display = 'none';
-                tableBody.innerHTML = '';
+            initEventListeners() {
+                document.getElementById('them-moi-btn').addEventListener('click', () => this.moModalThemMoi());
+                document.getElementById('luu-tai-lieu').addEventListener('click', () => this.luuTaiLieu());
+                document.getElementById('dong-modal').addEventListener('click', () => this.dongModal());
             }
-        }
 
-        function handleAuthClick() {
-            gapi.auth2.getAuthInstance().signIn();
-        }
+            async fetchTaiLieuData() {
+                const errorMessageEl = document.getElementById('error-message');
+                const tableBody = document.getElementById('tai-lieu-body');
+                
+                try {
+                    const apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A:J?key=${API_KEY}`;
+                    const response = await fetch(apiUrl);
 
-        function handleSignoutClick() {
-            gapi.auth2.getAuthInstance().signOut();
-        }
-
-        async function fetchTaiLieuData() {
-            showLoading();
-            try {
-                const response = await gapi.client.sheets.spreadsheets.values.get({
-                    spreadsheetId: SHEET_ID,
-                    range: `${SHEET_NAME}!A:J`,
-                });
-                currentData = response.result.values || [];
-                if (currentData.length > 0) {
-                    currentData = currentData.slice(1); // Remove header row
-                }
-                renderTable();
-            } catch (error) {
-                showMessage(`Lỗi tải dữ liệu: ${error.message}`, true);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function renderTable() {
-            tableBody.innerHTML = '';
-            currentData.forEach((row, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row[0] || ''}</td>
-                    <td>${row[1] || ''}</td>
-                    <td>${row[2] || ''}</td>
-                    <td>${row[3] || ''}</td>
-                    <td>${row[4] || ''}</td>
-                    <td>${row[5] || ''}</td>
-                    <td>${row[6] || ''}</td>
-                    <td>${row[7] || ''}</td>
-                    <td>${row[8] || ''}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning me-2 edit-btn" data-index="${index}">Sửa</button>
-                        <button class="btn btn-sm btn-danger delete-btn" data-index="${index}">Xóa</button>
-                    </td>
-                `;
-                tableBody.appendChild(tr);
-            });
-
-            // Add event listeners
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', editTaiLieu);
-            });
-
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', deleteTaiLieu);
-            });
-        }
-
-        themTaiLieuBtn.addEventListener('click', () => {
-            rowIndexInput.value = '';
-            taiLieuIdInput.value = '';
-            tenTaiLieuInput.value = '';
-            moTaInput.value = '';
-            loaiTaiLieuInput.value = '';
-            tieuChuanInput.value = '';
-            phienBanInput.value = '';
-            trangThaiInput.value = 'Mới';
-            taiLieuModal.show();
-        });
-
-        function editTaiLieu(event) {
-            const index = event.target.dataset.index;
-            const row = currentData[index];
-
-            rowIndexInput.value = index;
-            taiLieuIdInput.value = row[0] || '';
-            tenTaiLieuInput.value = row[1] || '';
-            moTaInput.value = row[2] || '';
-            loaiTaiLieuInput.value = row[3] || '';
-            tieuChuanInput.value = row[4] || '';
-            phienBanInput.value = row[5] || '';
-            trangThaiInput.value = row[6] || '';
-
-            taiLieuModal.show();
-        }
-
-        async function deleteTaiLieu(event) {
-            const index = parseInt(event.target.dataset.index);
-            if (!confirm('Bạn có chắc muốn xóa tài liệu này?')) return;
-
-            showLoading();
-            try {
-                await gapi.client.sheets.spreadsheets.batchUpdate({
-                    spreadsheetId: SHEET_ID,
-                    resource: {
-                        requests: [{
-                            deleteDimension: {
-                                range: {
-                                    sheetId: 0,
-                                    dimension: 'ROWS',
-                                    startIndex: index + 1,
-                                    endIndex: index + 2
-                                }
-                            }
-                        }]
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Error Response Text:', errorText);
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                });
 
-                currentData.splice(index, 1);
-                renderTable();
-                showMessage('Xóa tài liệu thành công!');
-            } catch (error) {
-                showMessage(`Lỗi xóa tài liệu: ${error.message}`, true);
-            } finally {
-                showLoading(false);
-            }
-        }
+                    const data = await response.json();
 
-        luuTaiLieuBtn.addEventListener('click', async () => {
-            const index = rowIndexInput.value;
-            const isEditMode = index !== '';
+                    if (!data.values || data.values.length === 0) {
+                        errorMessageEl.textContent = 'Không có dữ liệu trong sheet';
+                        errorMessageEl.style.display = 'block';
+                        return;
+                    }
 
-            const newRow = [
-                isEditMode ? taiLieuIdInput.value : (currentData.length + 1).toString(),
-                tenTaiLieuInput.value,
-                moTaInput.value,
-                loaiTaiLieuInput.value,
-                tieuChuanInput.value,
-                phienBanInput.value,
-                trangThaiInput.value,
-                'Admin', // Có thể thay đổi theo user đang đăng nhập
-                new Date().toLocaleDateString('vi-VN')
-            ];
+                    const rows = data.values.slice(1); // Bỏ qua hàng tiêu đề
 
-            showLoading();
-            try {
-                if (isEditMode) {
-                    await gapi.client.sheets.spreadsheets.values.update({
-                        spreadsheetId: SHEET_ID,
-                        range: `${SHEET_NAME}!A${parseInt(index) + 2}:I${parseInt(index) + 2}`,
-                        valueInputOption: 'RAW',
-                        resource: { values: [newRow] }
+                    tableBody.innerHTML = '';
+
+                    rows.forEach((row, index) => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${row[0] || ''}</td>
+                            <td>${row[1] || ''}</td>
+                            <td>${row[2] || ''}</td>
+                            <td>${row[3] || ''}</td>
+                            <td>${row[4] || ''}</td>
+                            <td>${row[5] || ''}</td>
+                            <td>${row[6] || ''}</td>
+                            <td>${row[7] || ''}</td>
+                            <td>${row[8] || ''}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning sua-btn" data-index="${index + 2}">Sửa</button>
+                                <button class="btn btn-sm btn-danger xoa-btn" data-index="${index + 2}">Xóa</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(tr);
                     });
-                    currentData[index] = newRow;
-                } else {
-                    await gapi.client.sheets.spreadsheets.values.append({
-                        spreadsheetId: SHEET_ID,
-                        range: `${SHEET_NAME}!A:I`,
-                        valueInputOption: 'RAW',
-                        resource: { values: [newRow] }
+
+                    // Gắn sự kiện cho các nút Sửa và Xóa
+                    document.querySelectorAll('.sua-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => this.suaTaiLieu(e));
                     });
-                    currentData.push(newRow);
+
+                    document.querySelectorAll('.xoa-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => this.xoaTaiLieu(e));
+                    });
+                } catch (error) {
+                    console.error('Lỗi chi tiết:', error);
+                    errorMessageEl.textContent = `Lỗi tải dữ liệu: ${error.message}`;
+                    errorMessageEl.style.display = 'block';
                 }
-
-                renderTable();
-                taiLieuModal.hide();
-                showMessage(`${isEditMode ? 'Sửa' : 'Thêm'} tài liệu thành công!`);
-            } catch (error) {
-                showMessage(`Lỗi ${isEditMode ? 'sửa' : 'thêm'} tài liệu: ${error.message}`, true);
-            } finally {
-                showLoading(false);
             }
-        });
 
-// Sửa lại hàm loadGoogleAPI
-function loadGoogleAPI() {
-    const script = document.createElement('script');
-    script.src = 'https://apis.google.com/js/api.js';
-    script.onload = function() {
-        console.log('Google API script loaded');
-        gapi.load('client:auth2', function() {
-            console.log('Google API client loaded');
-            initClient();
-        });
-    };
-    script.onerror = function() {
-        console.error('Failed to load Google API script');
-        showMessage('Không thể tải Google API script', true);
-    };
-    document.body.appendChild(script);
-}
+            moModalThemMoi() {
+                const modal = document.getElementById('tai-lieu-modal');
+                const modalTitle = document.getElementById('modal-title');
+                modalTitle.textContent = 'Thêm Tài Liệu Mới';
+                
+                // Đặt lại form
+                document.getElementById('row-index').value = '';
+                document.getElementById('ten-tai-lieu').value = '';
+                document.getElementById('mo-ta').value = '';
+                document.getElementById('loai').value = '';
+                document.getElementById('tieu-chuan').value = '';
+                document.getElementById('phien-ban').value = '';
+                document.getElementById('trang-thai').value = 'Mới Tạo';
+                document.getElementById('nguoi-tao').value = '';
 
-function checkGAPIStatus() {
-    console.log('GAPI Status:', {
-        'window.gapi exists': !!window.gapi,
-        'gapi.client exists': !!(window.gapi && gapi.client),
-        'gapi.auth2 exists': !!(window.gapi && gapi.auth2),
-        'API Key configured': !!API_KEY,
-        'Client ID configured': !!CLIENT_ID
-    });
-}
-function initClientWithRetry(retryCount = 0) {
-    const maxRetries = 3;
-    const retryDelay = 1000; // 1 second
+                modal.style.display = 'block';
+            }
 
-    if (retryCount >= maxRetries) {
-        showMessage('Không thể kết nối với Google API sau nhiều lần thử', true);
-        return;
-    }
+            suaTaiLieu(e) {
+                const rowIndex = e.target.getAttribute('data-index');
+                const modal = document.getElementById('tai-lieu-modal');
+                const modalTitle = document.getElementById('modal-title');
+                modalTitle.textContent = 'Sửa Tài Liệu';
 
-    try {
-        initClient();
-    } catch (error) {
-        console.error(`Retry ${retryCount + 1} failed:`, error);
-        setTimeout(() => initClientWithRetry(retryCount + 1), retryDelay);
-    }
-}
-// Gọi hàm này sau khi load script
-document.addEventListener('DOMContentLoaded', function() {
-    loadGoogleAPI();
-    setTimeout(checkGAPIStatus, 2000); // Kiểm tra sau 2 giây
-});
-        
+                // Lấy dữ liệu từ hàng được chọn
+                const row = e.target.closest('tr');
+                const cells = row.querySelectorAll('td');
 
-        document.addEventListener('DOMContentLoaded', loadGoogleAPI);
-        // Gọi hàm này sau khi load script
-document.addEventListener('DOMContentLoaded', function() {
-    loadGoogleAPI();
-    setTimeout(checkGAPIStatus, 2000); // Kiểm tra sau 2 giây
-});
-    </script>
-</body>
-</html>
+                document.getElementById('row-index').value = rowIndex;
+                document.getElementById('ten-tai-lieu').value = cells[1].textContent;
+                document.getElementById('mo-ta').value = cells[2].textContent;
+                document.getElementById('loai').value = cells[3].textContent;
+                document.getElementById('tieu-chuan').value = cells[4].textContent;
+                document.getElementById('phien-ban').value = cells[5].textContent;
+                document.getElementById('trang-thai').value = cells[6].textContent;
+                document.getElementById('nguoi-tao').value = cells[7].textContent;
+
+                modal.style.display = 'block';
+            }
+
+            dongModal() {
+                const modal = document.getElementById('tai-lieu-modal');
+                modal.style.display = 'none';
+            }
+
+            async luuTaiLieu() {
+                const rowIndex = document.getElementById('row-index').value;
+                const tenTaiLieu = document.getElementById('ten-tai-lieu').value;
+                const moTa = document.getElementById('mo-ta').value;
+                const loai = document.getElementById('loai').value;
+                const tieuChuan = document.getElementById('tieu-chuan').value;
+                const phienBan = document.getElementById('phien-ban').value;
+                const trangThai = document.getElementById('trang-thai').value;
+                const nguoiTao = document.getElementById('nguoi-tao').value;
+                const ngayTao = new Date().toLocaleDateString();
+
+                const errorMessageEl = document.getElementById('error-message');
+
+                try {
+                    // Xác định URL API phù hợp với việc thêm hoặc sửa
+                    let apiUrl, method, body;
+                    if (rowIndex) {
+                        // Sửa tài liệu
+                        apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A${rowIndex}:I${rowIndex}?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+                        method = 'PUT';
+                        body = JSON.stringify({
+                            range: `${SHEET_NAME}!A${rowIndex}:I${rowIndex}`,
+                            majorDimension: 'ROWS',
+                            values: [[
+                                rowIndex - 1, // ID tự động
+                                tenTaiLieu, 
+                                moTa, 
+                                loai, 
+                                tieuChuan, 
+                                phienBan, 
+                                trangThai, 
+                                nguoiTao, 
+                                ngayTao
+                            ]]
+                        });
+                    } else {
+                        // Thêm tài liệu mới
+                        apiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${SHEET_NAME}!A:I:append?valueInputOption=USER_ENTERED&key=${API_KEY}`;
+                        method = 'POST';
+                        body = JSON.stringify({
+                            range: `${SHEET_NAME}!A:I`,
+                            majorDimension: 'ROWS',
+                            values: [[
+                                '', // ID để trống để tự động điền
+                                tenTaiLieu, 
+                                moTa, 
+                                loai, 
+                                tieuChuan, 
+                                phienBan, 
+                                trangThai, 
+                                nguoiTao, 
+                                ngayTao
+                            ]]
+                        });
+                    }
+
+                    const response = await fetch(apiUrl, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: body
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Error Response Text:', errorText);
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    // Đóng modal và làm mới dữ liệu
+                    this.dongModal();
+                    this.fetchTaiLieuData();
+
+                    errorMessageEl.style.display = 'none';
+                } catch (error) {
+                    console.error('Lỗi chi tiết:',
